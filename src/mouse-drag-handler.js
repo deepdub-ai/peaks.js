@@ -61,6 +61,8 @@ define(["konva"], function (Konva) {
     this._stage.on("contextmenu", this._contextMenu);
 
     this._mouseDownClientX = null;
+
+    stage.container().addEventListener("wheel", this._mouseWheel, false);
   }
 
   MouseDragHandler.prototype._contextMenu = function (event) {
@@ -112,6 +114,19 @@ define(["konva"], function (Konva) {
    * @param {MouseEvent} event
    */
   MouseDragHandler.prototype._mouseWheel = function (event) {
+    if (this._handlers.onMouseWheel) {
+      this._handlers.onMouseWheel(event);
+    }
+  };
+
+  /**
+   * Mouse wheel event handler.
+   *
+   * @param {MouseEvent} event
+   */
+  MouseDragHandler.prototype._mouseWheel = function (event) {
+    event.preventDefault();
+
     if (this._handlers.onMouseWheel) {
       this._handlers.onMouseWheel(event);
     }

@@ -496,7 +496,7 @@ define([
     );
   }
 
-  WaveformZoomView.prototype.setZoom = function (options) {
+  WaveformZoomView.prototype.setZoom = _throttle(function (options) {
     var scale;
 
     if (isAutoScale(options)) {
@@ -571,7 +571,7 @@ define([
     this._peaks.emit("zoom.update", scale, prevScale);
 
     return true;
-  };
+  }, 50);
 
   WaveformZoomView.prototype.throttledSetZoom = _throttle(function (options) {
     this.setZoom(options);
@@ -837,7 +837,6 @@ define([
     this._height = this._container.clientHeight;
     this._stage.height(this._height);
 
-    this._waveformShape.fitToView();
     this._playheadLayer.fitToView();
     this._segmentsLayer.fitToView();
     this._pointsLayer.fitToView();

@@ -353,6 +353,9 @@ var options = {
   // Array of zoom levels in samples per pixel (big >> small)
   zoomLevels: [512, 1024, 2048, 4096],
 
+  // Enable wheel/trackpad interaction for scrolling and zooming
+  gestures: true,
+
   // Bind keyboard controls
   keyboard: false,
 
@@ -397,6 +400,9 @@ var options = {
 
   // the color of a point marker
   pointMarkerColor: '#FF0000',
+  
+  // Hide axis gridlines
+  hideAxis: false,
 
   // Color of the axis gridlines
   axisGridlineColor: '#ccc',

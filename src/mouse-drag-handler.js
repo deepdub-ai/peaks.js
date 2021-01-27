@@ -6,10 +6,8 @@
  * @module mouse-drag-handler
  */
 
-define([
-  'konva'
-], function(Konva) {
-  'use strict';
+define(["konva"], function (Konva) {
+  "use strict";
 
   function getMarkerObject(obj) {
     while (obj.parent !== null) {
@@ -47,15 +45,15 @@ define([
    */
 
   function MouseDragHandler(stage, handlers) {
-    this._stage     = stage;
-    this._handlers  = handlers;
-    this._dragging  = false;
+    this._stage = stage;
+    this._handlers = handlers;
+    this._dragging = false;
     this._mouseDown = this._mouseDown.bind(this);
-    this._mouseUp   = this._mouseUp.bind(this);
+    this._mouseUp = this._mouseUp.bind(this);
     this._mouseMove = this._mouseMove.bind(this);
 
-    this._stage.on('mousedown', this._mouseDown);
-    this._stage.on('touchstart', this._mouseDown);
+    this._stage.on("mousedown", this._mouseDown);
+    this._stage.on("touchstart", this._mouseDown);
 
     this._mouseDownClientX = null;
   }
@@ -66,7 +64,7 @@ define([
    * @param {MouseEvent} event
    */
 
-  MouseDragHandler.prototype._mouseDown = function(event) {
+  MouseDragHandler.prototype._mouseDown = function (event) {
     var marker = getMarkerObject(event.target);
 
     // Avoid interfering with drag/drop of point and segment markers.
@@ -74,10 +72,9 @@ define([
       return;
     }
 
-    if (event.type === 'touchstart') {
+    if (event.type === "touchstart") {
       this._mouseDownClientX = Math.floor(event.evt.touches[0].clientX);
-    }
-    else {
+    } else {
       this._mouseDownClientX = event.evt.clientX;
     }
 
@@ -90,11 +87,22 @@ define([
     // Use the window mousemove and mouseup handlers instead of the
     // Konva.Stage ones so that we still receive events if the user moves the
     // mouse outside the stage.
-    window.addEventListener('mousemove', this._mouseMove, false);
-    window.addEventListener('touchmove', this._mouseMove, false);
-    window.addEventListener('mouseup', this._mouseUp, false);
-    window.addEventListener('touchend', this._mouseUp, false);
-    window.addEventListener('blur', this._mouseUp, false);
+    window.addEventListener("mousemove", this._mouseMove, false);
+    window.addEventListener("touchmove", this._mouseMove, false);
+    window.addEventListener("mouseup", this._mouseUp, false);
+    window.addEventListener("touchend", this._mouseUp, false);
+    window.addEventListener("blur", this._mouseUp, false);
+  };
+
+  /**
+   * Mouse wheel event handler.
+   *
+   * @param {MouseEvent} event
+   */
+  MouseDragHandler.prototype._mouseWheel = function (event) {
+    if (this._handlers.onMouseWheel) {
+      this._handlers.onMouseWheel(event);
+    }
   };
 
   /**
@@ -103,13 +111,12 @@ define([
    * @param {MouseEvent} event
    */
 
-  MouseDragHandler.prototype._mouseMove = function(event) {
+  MouseDragHandler.prototype._mouseMove = function (event) {
     var clientX = null;
 
-    if (event.type === 'touchmove') {
+    if (event.type === "touchmove") {
       clientX = Math.floor(event.changedTouches[0].clientX);
-    }
-    else {
+    } else {
       clientX = event.clientX;
     }
 
@@ -133,16 +140,15 @@ define([
    * @param {MouseEvent} event
    */
 
-  MouseDragHandler.prototype._mouseUp = function(event) {
+  MouseDragHandler.prototype._mouseUp = function (event) {
     var clientX = null;
 
-    if (event.type === 'touchend') {
+    if (event.type === "touchend") {
       clientX = Math.floor(event.changedTouches[0].clientX);
       if (event.cancelable) {
         event.preventDefault();
       }
-    }
-    else {
+    } else {
       clientX = event.clientX;
     }
 
@@ -152,11 +158,11 @@ define([
       this._handlers.onMouseUp(mousePosX);
     }
 
-    window.removeEventListener('mousemove', this._mouseMove, false);
-    window.removeEventListener('touchmove', this._mouseMove, false);
-    window.removeEventListener('mouseup', this._mouseUp, false);
-    window.removeEventListener('touchend', this._mouseUp, false);
-    window.removeEventListener('blur', this._mouseUp, false);
+    window.removeEventListener("mousemove", this._mouseMove, false);
+    window.removeEventListener("touchmove", this._mouseMove, false);
+    window.removeEventListener("mouseup", this._mouseUp, false);
+    window.removeEventListener("touchend", this._mouseUp, false);
+    window.removeEventListener("blur", this._mouseUp, false);
 
     this._dragging = false;
   };
@@ -169,7 +175,7 @@ define([
    * @param {Number} clientX Mouse client X position.
    */
 
-  MouseDragHandler.prototype._getMousePosX = function(clientX) {
+  MouseDragHandler.prototype._getMousePosX = function (clientX) {
     var containerPos = this._stage.getContainer().getBoundingClientRect();
 
     return clientX - containerPos.left;
@@ -182,7 +188,7 @@ define([
    * @returns {Boolean}
    */
 
-  MouseDragHandler.prototype.isDragging = function() {
+  MouseDragHandler.prototype.isDragging = function () {
     return this._dragging;
   };
 

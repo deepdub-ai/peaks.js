@@ -24,7 +24,7 @@ declare module '@reelcrafter/peaks.js' {
   }
 
   interface Segment extends SegmentAddOptions {
-    update: (options: SegmentUpdateOptions) => void;
+    update?: (options: SegmentUpdateOptions) => void;
   }
 
   interface PointAddOptions {
@@ -172,6 +172,8 @@ declare module '@reelcrafter/peaks.js' {
     height?: number;
     /** Array of zoom levels in samples per pixel (big >> small) */
     zoomLevels?: number[];
+    /** Enable wheel/trackpad interaction for scrolling and zooming */
+    gestures?: boolean;
     /** Bind keyboard controls */
     keyboard?: boolean;
     /** Keyboard nudge increment in seconds (left arrow/right arrow) */
@@ -209,6 +211,8 @@ declare module '@reelcrafter/peaks.js' {
     showPlayheadTime?: boolean;
     /** The color of a point marker */
     pointMarkerColor?: string;
+    /** Hide axis gridlines? */
+    hideAxis?: boolean;
     /** Color of the axis gridlines */
     axisGridlineColor?: string;
     /** Color of the axis labels */

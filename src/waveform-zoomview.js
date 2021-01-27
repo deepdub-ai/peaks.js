@@ -192,7 +192,7 @@ define([
 
           var maxScale = self._getScale(seconds);
 
-          self.setZoom({
+          self.throttledSetZoom({
             scale: Utils.clamp(self._scale + event.deltaY * 16, 64, maxScale),
           });
         } else {
@@ -422,6 +422,10 @@ define([
 
     return true;
   };
+
+  WaveformZoomView.prototype.throttledSetZoom = _throttle(function (options) {
+    this.setZoom(options);
+  }, 50);
 
   WaveformZoomView.prototype._resampleData = function (options) {
     this._data = this._originalWaveformData.resample(options);

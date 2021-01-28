@@ -1,6 +1,6 @@
 {
   "name": "peaks.js",
-  "version": "0.24.1",
+  "version": "0.25.0",
   "description": "JavaScript UI component for displaying audio waveforms",
   "main": "./peaks.js",
   "types": "./peaks.js.d.ts",
@@ -12,7 +12,8 @@
   "contributors": [
     "Chris Finch (https://github.com/chrisfinch)",
     "Thomas Parisot (https://github.com/oncletom)",
-    "Chris Needham (https://github.com/chrisn)"
+    "Chris Needham (https://github.com/chrisn)",
+    "Sam Hulick (https://github.com/ffxsam)"
   ],
   "keywords": [
     "audio",

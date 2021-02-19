@@ -8,6 +8,7 @@ class CustomSegmentMarker {
     // (required, see below)
     this._options = options;
     this.init = this.init.bind(this);
+    this._options.layer._peaks.addListener('zoom.update', this.timeUpdated.bind(this))
   }
 
   init(group) {
@@ -87,14 +88,21 @@ class CustomSegmentMarker {
             shadowColor: '#ccc'
             // shadowEnabled: true,
           });
-          this._dragger = new Konva.Rect({
+          this._dragger = new Konva.Group();
+          this._dragger.add(new Konva.Rect({
+            x:0,
+            width: endPixel - startPixel,
+            height: 25,
+            y: 0,
+          }))
+          this._dragger.add(new Konva.Rect({
             x:0,
             width: endPixel - startPixel,
             height: 10,
             y: 5,
             fill: '#333',
             cornerRadius: 3
-          })
+          }))
           this._label.listening(false);
           this._rect.listening(false);
           // console.log("wtf22");
@@ -153,11 +161,12 @@ class CustomSegmentMarker {
 
   fitToView() {
     console.log("fitToView");
+    this.timeUpdated()
 
     // (required, see below)
   }
 
-  timeUpdated(options) {
+  timeUpdated() {
     if (!this._options.startMarker) {
       console.log('hey')
       console.log(this._options.getStartMarker())
@@ -179,7 +188,7 @@ class CustomSegmentMarker {
     const xTextPadding = 5;
     this._rect.width(endPixel - startPixel);
     this._label.width(endPixel - startPixel - xTextPadding * 2)
-    this._dragger.width(endPixel - startPixel)
+    this._dragger.children.forEach(child => child.width(endPixel - startPixel))
 
     this._options.layer.draw();
     // (optional, see below)

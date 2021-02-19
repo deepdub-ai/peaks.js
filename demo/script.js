@@ -1,5 +1,8 @@
 // import Konva from "konva";
 
+let labelIndex = 0;
+const labels = ['Sammy Jankis']
+
 class CustomSegmentMarker {
   constructor(options) {
     // (required, see below)
@@ -54,13 +57,21 @@ class CustomSegmentMarker {
         // group.add(this._line);
         if (this._options.startMarker) {
           const yPadding = 25
+          const xTextPadding = 5
+          const yTextPadding = 5
+          const lineHeight = 15
           // debugger;
           this._label = new Konva.Text({
-            'text': 'Alice',
-            x: 0,
-            y: 0,
+            text: labels[labelIndex++%labels.length],
+            fontSize: 15,
+            width: endPixel - startPixel - xTextPadding * 2,
+            fontWeight: 800,
+            x: xTextPadding,
+            y: height / 2 - yPadding - lineHeight - yTextPadding,
+            ellipsis: true,
+            wrap: "none",
           })
-          this._topLine = new Konva.Rect({
+          this._rect = new Konva.Rect({
             x: 0,
             y: yPadding,
             width: endPixel - startPixel,
@@ -76,16 +87,32 @@ class CustomSegmentMarker {
             shadowColor: '#ccc'
             // shadowEnabled: true,
           });
+          this._dragger = new Konva.Rect({
+            x:0,
+            width: endPixel - startPixel,
+            height: 10,
+            y: 5,
+            fill: '#333',
+            cornerRadius: 3
+          })
           this._label.listening(false);
-          this._topLine.listening(false);
+          this._rect.listening(false);
           // console.log("wtf22");
-          // this._topLine = new Konva.Line({
+          // this._rect = new Konva.Line({
           //   points: [0, 10, endPixel - startPixel, 10], // x1, y1, x2, y2
           //   stroke: "#777",
           //   strokeWidth: 2,
           // });
-          group.add(this._topLine);
+          group.add(this._dragger);
+          group.add(this._rect);
           group.add(this._label);
+
+          this._dragger.addEventListener('mousedown', () => {
+            this._isDragging = true;
+            window.addEventListener('mouseup', () => {
+              this._isDragging = false;
+            })
+          })
         }
         group.add(this._handle);
       } else {
@@ -99,6 +126,13 @@ class CustomSegmentMarker {
     };
 
     render();
+
+    group.addEventListener("mousedown", (e) => {
+      console.log(e)
+      if (this._options.startMarker) {
+        this._initDuration = this._options.segment.endTime - this._options.segment.startTime
+      }
+    });
 
     group.addEventListener("mouseenter", () => {
       render(true);
@@ -130,6 +164,11 @@ class CustomSegmentMarker {
       console.log(this._options.getStartMarker()._marker.timeUpdated())
       return
     }
+
+    if (this._isDragging) {
+      this._options.segment._endTime = this._options.segment._startTime + this._initDuration
+    }
+
     // console.log("timeUpdated", options);
     const startPixel = this._options.layer._view.timeToPixels(
       this._options.segment.startTime
@@ -137,8 +176,10 @@ class CustomSegmentMarker {
     const endPixel = this._options.layer._view.timeToPixels(
       this._options.segment.endTime
     );
-
-    this._topLine.width(endPixel - startPixel);
+    const xTextPadding = 5;
+    this._rect.width(endPixel - startPixel);
+    this._label.width(endPixel - startPixel - xTextPadding * 2)
+    this._dragger.width(endPixel - startPixel)
 
     this._options.layer.draw();
     // (optional, see below)

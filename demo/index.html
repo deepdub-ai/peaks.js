@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
+    <script src="script.js"></script>
     <title>Peaks.js Demo Page</title>
     <style>
       body {
@@ -328,63 +329,9 @@
           });
         };
 
-        class CustomSegmentMarker {
-          constructor(options) {
-            // (required, see below)
-            this._options = options;
-            this.init = this.init.bind(this);
-          }
-
-          init(group) {
-            const layer = this._options.layer;
-            console.log(this._options);
-            const height = layer.getHeight();
-
-            const imageObj = new Image();
-            imageObj.src = "/drag.png";
-            this._handle = new Konva.Image({
-              x: -4.5,
-              y: layer._layer.canvas.height / 4 - 10,
-              image: imageObj,
-              width: 9,
-              height: 20,
-            });
-
-            // this._handle = new Konva.Rect({
-            //   x: -20,
-            //   // y: this._options.,
-            //   y: layer._layer.canvas.height / 4 - 10,
-            //   width: 40,
-            //   height: 20,
-            //   fill: this._options.color,
-            // });
-
-            this._line = new Konva.Line({
-              points: [0, 0, 0, 400], // x1, y1, x2, y2
-              stroke: "#aaa",
-              strokeWidth: 1,
-            });
-
-            group.add(this._handle);
-            group.add(this._line);
-          }
-
-          fitToView() {
-            // (required, see below)
-          }
-
-          timeUpdated() {
-            // (optional, see below)
-          }
-
-          destroy() {
-            // (optional, see below)
-          }
-        }
 
         function createSegmentMarker(options) {
-          console.log(options);
-          return new CustomSegmentMarker(options);
+          return new window.CustomSegmentMarker(options);
         }
 
 
@@ -625,43 +572,7 @@
             console.log('player.pause:', time);
           });
 
-          let initNewSegmentTime = -1;
-          let isAddedSegment = false
-
-          peaksInstance.on("zoomview.mousedown", function (time) {
-            initNewSegmentTime = time;
-            isAddedSegment= false;
-          });
-
-          peaksInstance.on("zoomview.drag", function (time) {
-            if (!isAddedSegment && Math.abs(time - initNewSegmentTime) < 0.1) {
-              return
-            }
-
-            if (!isAddedSegment) {
-              peaksInstance.segments.add({
-                startTime: time,
-                endTime: time + 10,
-                labelText: "Test segment " + segmentCounter++,
-                editable: true,
-              });
-              isAddedSegment = true
-            }
-
-            const lastSegment = peaksInstance.segments
-              .getSegments()
-              .slice(-1)[0];
-
-            if (time < initNewSegmentTime) {
-              lastSegment.update({ startTime: time, endTime: initNewSegmentTime });
-            } else {
-              lastSegment.update({ endTime: time, startTime: initNewSegmentTime });
-            }
-          });
-
-          peaksInstance.on("zoomview.mouseup", function (time) {
-            console.log("zoomview.mouseup", time);
-          });
+          window.init(peaksInstance)
         });
       })(peaks);
   </body>

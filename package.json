@@ -51,6 +51,7 @@
     "clean": "rm demo/peaks.js* peaks.js peaks.js.map"
   },
   "devDependencies": {
+    "babel-eslint": "^10.1.0",
     "browserify": "~17.0.0",
     "browserify-istanbul": "~3.0.1",
     "chai": "~4.3.4",

@@ -625,33 +625,43 @@
             console.log('player.pause:', time);
           });
 
+          let initNewSegmentTime = -1;
+          let isAddedSegment = false
+
           peaksInstance.on("zoomview.mousedown", function (time) {
-            initSegmentTime = time;
-            peaksInstance.segments.add({
-              startTime: time,
-              endTime: time + 10,
-              labelText: "Test segment " + segmentCounter++,
-              editable: true,
-            });
+            initNewSegmentTime = time;
+            isAddedSegment= false;
           });
 
           peaksInstance.on("zoomview.drag", function (time) {
-            // console.log("zoomview.drag", time);
+            if (!isAddedSegment && Math.abs(time - initNewSegmentTime) < 0.1) {
+              return
+            }
+
+            if (!isAddedSegment) {
+              peaksInstance.segments.add({
+                startTime: time,
+                endTime: time + 10,
+                labelText: "Test segment " + segmentCounter++,
+                editable: true,
+              });
+              isAddedSegment = true
+            }
+
             const lastSegment = peaksInstance.segments
               .getSegments()
               .slice(-1)[0];
 
-            if (time < initSegmentTime) {
-              lastSegment.update({ startTime: time, endTime: initSegmentTime });
+            if (time < initNewSegmentTime) {
+              lastSegment.update({ startTime: time, endTime: initNewSegmentTime });
             } else {
-              lastSegment.update({ endTime: time, startTime: initSegmentTime });
+              lastSegment.update({ endTime: time, startTime: initNewSegmentTime });
             }
           });
 
           peaksInstance.on("zoomview.mouseup", function (time) {
             console.log("zoomview.mouseup", time);
           });
-
         });
       })(peaks);
   </body>

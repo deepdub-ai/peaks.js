@@ -36,13 +36,10 @@ define(['./utils', 'konva'], function(Utils, Konva) {
 
     var shapeOptions = {};
 
-
-    if (Utils.isString(options.color)) {
-      // shapeOptions.fill = options.color;
-      const img = new Image();
-      img.src = '/pattern.png';
-
-      shapeOptions.fillPatternImage = img
+    if (options.pattern) {
+      shapeOptions.fillPatternImage = options.pattern
+    } else if (Utils.isString(options.color)) {
+      shapeOptions.fill = options.color;
     }
     else if (Utils.isObject(options.color)) {
       if (!Utils.isLinearGradientColor(options.color)) {

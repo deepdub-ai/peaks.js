@@ -193,7 +193,7 @@ define([
           var maxScale = self._getScale(seconds);
 
           self.throttledSetZoom({
-            scale: Utils.clamp(self._scale + event.deltaY * 16, 64, maxScale),
+            scale: Utils.clamp(self._scale + event.deltaY * 16, 256, maxScale),
           });
         } else {
           var newFrameOffset = Utils.clamp(

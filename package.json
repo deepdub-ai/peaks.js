@@ -1,6 +1,6 @@
 {
-  "name": "peaks.js",
-  "version": "0.26.4",
+  "name": "@dutzi/peaks.js",
+  "version": "1.0.0",
   "description": "JavaScript UI component for displaying audio waveforms",
   "main": "./peaks.js",
   "files": [
@@ -24,10 +24,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/reelcrafter/peaks.js.git"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/@reelcrafter"
+    "url": "git://github.com/dutzi/peaks.js.git"
   },
   "license": "LGPL-3.0",
   "engines": {

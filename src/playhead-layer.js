@@ -316,6 +316,10 @@ define([
     this._playheadLayer.draw();
   };
 
+  PlayheadLayer.prototype.setPlayheadLineColor = function(color) {
+    this._playheadLine.stroke(color)
+  };
+
   PlayheadLayer.prototype.destroy = function() {
     if (this._playheadLineAnimation) {
       this._playheadLineAnimation.stop();

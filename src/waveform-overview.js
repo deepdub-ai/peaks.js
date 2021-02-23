@@ -435,6 +435,10 @@ define([
     this._stage.draw();
   };
 
+  WaveformOverview.prototype.setPlayheadLineColor = function(color) {
+    this._playheadLayer.setPlayheadLineColor(color)
+  }
+
   WaveformOverview.prototype.destroy = function() {
     if (this._resizeTimeoutId) {
       clearTimeout(this._resizeTimeoutId);

@@ -1,6 +1,6 @@
 {
-  "name": "@dutzi/peaks.js",
-  "version": "1.0.0",
+  "name": "@notdutzi/peaks.js",
+  "version": "1.0.2",
   "description": "JavaScript UI component for displaying audio waveforms",
   "main": "./peaks.js",
   "files": [
@@ -13,6 +13,9 @@
     "Chris Needham (https://github.com/chrisn)",
     "Sam Hulick (https://github.com/ffxsam)"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "audio",
     "visualisation",
@@ -26,7 +29,6 @@
     "type": "git",
     "url": "git://github.com/dutzi/peaks.js.git"
   },
-  "license": "LGPL-3.0",
   "engines": {
     "node": ">= 8.11.2"
   },

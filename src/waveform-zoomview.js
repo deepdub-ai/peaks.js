@@ -184,16 +184,20 @@ define([
 
         // Vertical scroll? If so, zoom
         if (event.shiftKey) {
-          var seconds = self._peaks.player.getDuration();
+          const seconds = self._peaks.player.getDuration();
 
           if (!Utils.isValidTime(seconds)) {
             return;
           }
 
-          var maxScale = self._getScale(seconds);
-
+          const maxScale = self._getScale(seconds);
+          const waveformDataScale = self._originalWaveformData.scale;
+          const targetScale =
+            self._scale +
+            event.deltaY *
+              Math.sqrt(Math.sqrt(self._scale - waveformDataScale + 0.0001));
           self.throttledSetZoom({
-            scale: Utils.clamp(self._scale + event.deltaY * 16, 256, maxScale),
+            scale: Utils.clamp(targetScale, waveformDataScale, maxScale),
           });
         } else {
           var newFrameOffset = Utils.clamp(
@@ -381,7 +385,7 @@ define([
         "peaks.zoomview.setZoom(): zoom level must be at least " +
           this._originalWaveformData.scale
       );
-      scale = this._originalWaveformData.scale;
+      // scale = this._originalWaveformData.scale;
     }
 
     var currentTime = this._peaks.player.getCurrentTime();
@@ -699,9 +703,9 @@ define([
     this._stage.draw();
   };
 
-  WaveformZoomView.prototype.setPlayheadLineColor = function(color) {
-    this._playheadLayer.setPlayheadLineColor(color)
-  }
+  WaveformZoomView.prototype.setPlayheadLineColor = function (color) {
+    this._playheadLayer.setPlayheadLineColor(color);
+  };
 
   /* WaveformZoomView.prototype.beginZoom = function() {
     // Fade out the time axis and the segments

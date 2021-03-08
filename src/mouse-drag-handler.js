@@ -81,7 +81,7 @@ define(["konva"], function (Konva) {
     if (this._handlers.onMouseDown) {
       var mouseDownPosX = this._getMousePosX(this._mouseDownClientX);
 
-      this._handlers.onMouseDown(mouseDownPosX);
+      this._handlers.onMouseDown(mouseDownPosX, event);
     }
 
     // Use the window mousemove and mouseup handlers instead of the
@@ -130,7 +130,12 @@ define(["konva"], function (Konva) {
     if (this._handlers.onMouseMove) {
       var mousePosX = this._getMousePosX(clientX);
 
-      this._handlers.onMouseMove(mousePosX);
+      // FIXME this might cause an issue?
+      // This line was in the base, while the uncommented line appears in the
+      // fork branch.
+      //
+      // this._handlers.onMouseMove(mousePosX);
+      this._handlers.onMouseMove(event.type, mousePosX, event);
     }
   };
 

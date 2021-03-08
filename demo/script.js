@@ -208,12 +208,38 @@ window.init = (peaksInstance) => {
   let isAddedSegment = false;
   let segmentCounter = 0;
 
+  let isMetaKeyDown = false;
+  let isMetaKeyDownWhenMouseDown = false;
+  window.addEventListener('keydown', (e) => {
+    if (e.metaKey) {
+      isMetaKeyDown = true;
+      document.querySelector('.konvajs-content').style.cursor = 'crosshair'
+    }
+  });
+
+  window.addEventListener('keyup', (e) => {
+    if (!e.metaKey) {
+      isMetaKeyDown = false;
+      document.querySelector('.konvajs-content').style.cursor = 'default'
+    }
+  });
+
   peaksInstance.on("zoomview.mousedown", function (time) {
+    isMetaKeyDownWhenMouseDown = isMetaKeyDown;
+    if (isMetaKeyDown) {
+      return;
+    }
+
     initNewSegmentTime = time;
     isAddedSegment = false;
   });
 
   peaksInstance.on("zoomview.drag", function (time) {
+    if (isMetaKeyDownWhenMouseDown) {
+      peaksInstance.player.seek(time);
+      return;
+    }
+
     if (!isAddedSegment && Math.abs(time - initNewSegmentTime) < 0.1) {
       return;
     }

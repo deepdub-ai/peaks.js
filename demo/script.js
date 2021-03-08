@@ -135,8 +135,7 @@ class CustomSegmentMarker {
 
     render();
 
-    group.addEventListener("mousedown", (e) => {
-      console.log(e)
+    group.addEventListener("mousedown", () => {
       if (this._options.startMarker) {
         this._initDuration = this._options.segment.endTime - this._options.segment.startTime
       }
@@ -168,9 +167,7 @@ class CustomSegmentMarker {
 
   timeUpdated() {
     if (!this._options.startMarker) {
-      console.log('hey')
-      console.log(this._options.getStartMarker())
-      console.log(this._options.getStartMarker()._marker.timeUpdated())
+      this._options.getStartMarker()._marker.timeUpdated()
       return
     }
 
@@ -210,10 +207,16 @@ window.init = (peaksInstance) => {
 
   let isMetaKeyDown = false;
   let isMetaKeyDownWhenMouseDown = false;
+  let isAltKeyDown = false;
+  let isAltKeyDownWhenMouseDown = false;
   window.addEventListener('keydown', (e) => {
     if (e.metaKey) {
       isMetaKeyDown = true;
       document.querySelector('.konvajs-content').style.cursor = 'crosshair'
+    }
+
+    if (e.altKey) {
+      isAltKeyDown = true;
     }
   });
 
@@ -222,10 +225,15 @@ window.init = (peaksInstance) => {
       isMetaKeyDown = false;
       document.querySelector('.konvajs-content').style.cursor = 'default'
     }
+
+    if (!e.altKey) {
+      isAltKeyDown = false;
+    }
   });
 
   peaksInstance.on("zoomview.mousedown", function (time) {
     isMetaKeyDownWhenMouseDown = isMetaKeyDown;
+    isAltKeyDownWhenMouseDown = isAltKeyDown;
     if (isMetaKeyDown) {
       return;
     }
@@ -256,10 +264,11 @@ window.init = (peaksInstance) => {
 
     const lastSegment = peaksInstance.segments.getSegments().slice(-1)[0];
 
+    const slowDownFactor = isAltKeyDownWhenMouseDown ? 1 / 10 : 1
     if (time < initNewSegmentTime) {
-      lastSegment.update({ startTime: time, endTime: initNewSegmentTime });
+      lastSegment.update({ startTime: (time - initNewSegmentTime) * slowDownFactor + initNewSegmentTime, endTime: initNewSegmentTime });
     } else {
-      lastSegment.update({ endTime: time, startTime: initNewSegmentTime });
+      lastSegment.update({ endTime: (time - initNewSegmentTime) * slowDownFactor + initNewSegmentTime, startTime: initNewSegmentTime });
     }
   });
 

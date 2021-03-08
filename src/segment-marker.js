@@ -68,7 +68,9 @@ define([
         self._onDrag(self);
       });
 
-      self._group.on('dragstart', function() {
+      self._group.on('dragstart', function(event) {
+        self.isAltKeyDownWhenMouseDown = event.evt.altKey
+        self.initDragTargetX = event.target.getX()
         self._onDragStart(self);
       });
 
@@ -90,25 +92,29 @@ define([
     var marker;
     var limit;
 
+    const slowDownFactor = this.isAltKeyDownWhenMouseDown ? 1 / 10 : 1
+    let posX = (pos.x - this.initDragTargetX) * slowDownFactor + this.initDragTargetX
+
     if (this._startMarker) {
       marker = this._segmentShape.getEndMarker();
       limit  = marker.getX() - marker.getWidth();
 
-      if (pos.x > limit) {
-        pos.x = limit;
+      if (posX > limit) {
+        posX = limit;
       }
     }
     else {
       marker = this._segmentShape.getStartMarker();
       limit  = marker.getX() + marker.getWidth();
 
-      if (pos.x < limit) {
-        pos.x = limit;
+      if (posX < limit) {
+        posX = limit;
       }
     }
 
+
     return {
-      x: pos.x,
+      x: posX,
       y: this._group.getAbsolutePosition().y
     };
   };

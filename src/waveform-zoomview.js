@@ -133,7 +133,10 @@ define([
       totalMovementX: 0,
       initPixelIndex: 0,
       newFrameOffset: 0,
-      onMouseDown: function (mousePosX) {
+      isAltKeyDownWhenMouseDown: false,
+
+      onMouseDown: function (mousePosX, event) {
+        this.isAltKeyDownWhenMouseDown = event.evt.altKey;
         this.initialFrameOffset = self._frameOffset;
         this.newFrameOffset = 0;
         this.mouseDownX = mousePosX;
@@ -173,8 +176,11 @@ define([
           }
         }
 
+        const slowDownFactor = this.isAltKeyDownWhenMouseDown ? 1 / 10 : 1;
         var newFrameOffset = Utils.clamp(
-          this.initialFrameOffset + this.totalMovementX,
+          Math.round(
+            this.initialFrameOffset + this.totalMovementX * slowDownFactor
+          ),
           0,
           self._pixelLength - self._width
         );

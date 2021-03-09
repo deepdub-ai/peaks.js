@@ -134,6 +134,7 @@ define([
       initPixelIndex: 0,
       newFrameOffset: 0,
       isAltKeyDownWhenMouseDown: false,
+      mouseDownZoom: 0,
 
       onMouseDown: function (mousePosX, event) {
         this.isAltKeyDownWhenMouseDown = event.evt.altKey;
@@ -141,6 +142,7 @@ define([
         this.newFrameOffset = 0;
         this.mouseDownX = mousePosX;
         this.totalMovementX = 0;
+        this.mouseDownZoomScale = self._peaks.views.getView("zoomview")._scale;
 
         var pixelIndex = self._frameOffset + mousePosX;
         this.initPixelIndex = pixelIndex;
@@ -163,24 +165,43 @@ define([
 
         event.target.requestPointerLock();
 
+        const slowDownFactor = this.isAltKeyDownWhenMouseDown ? 1 / 10 : 1;
+        const zoomChangeFactor =
+          this.mouseDownZoomScale /
+          self._peaks.views.getView("zoomview")._scale;
+
+        function calculateTime() {
+          var pixelIndex =
+            this.mouseDownX +
+            this.initialFrameOffset * zoomChangeFactor +
+            this.totalMovementX * zoomChangeFactor +
+            (this.initPixelIndex - this.initialFrameOffset) *
+              (zoomChangeFactor - 1);
+          return self.pixelsToTime(pixelIndex);
+        }
+
+        function calculateOffset() {
+          return (
+            this.initialFrameOffset * zoomChangeFactor +
+            this.totalMovementX * slowDownFactor * zoomChangeFactor +
+            (this.initPixelIndex - this.initialFrameOffset) *
+              (zoomChangeFactor - 1)
+          );
+        }
+
         if (eventType !== "touchmove") {
           this.totalMovementX += event.movementX;
-          var pixelIndex =
-            this.mouseDownX + this.initialFrameOffset + this.totalMovementX;
-          var time = self.pixelsToTime(pixelIndex);
+          const time = calculateTime();
 
           self._peaks.emit("zoomview.drag", time);
 
-          if (event.metaKey) {
+          if (event.ctrlKey) {
             self._playheadLayer.updatePlayheadTime(time);
           }
         }
 
-        const slowDownFactor = this.isAltKeyDownWhenMouseDown ? 1 / 10 : 1;
         var newFrameOffset = Utils.clamp(
-          Math.round(
-            this.initialFrameOffset + this.totalMovementX * slowDownFactor
-          ),
+          Math.round(calculateOffset()),
           0,
           self._pixelLength - self._width
         );

@@ -205,13 +205,13 @@ window.init = (peaksInstance) => {
   let isAddedSegment = false;
   let segmentCounter = 0;
 
-  let isMetaKeyDown = false;
-  let isMetaKeyDownWhenMouseDown = false;
+  let isCtrlKeyDown = false;
+  let isCtrlKeyDownWhenMouseDown = false;
   let isAltKeyDown = false;
   let isAltKeyDownWhenMouseDown = false;
   window.addEventListener('keydown', (e) => {
-    if (e.metaKey) {
-      isMetaKeyDown = true;
+    if (e.ctrlKey) {
+      isCtrlKeyDown = true;
       document.querySelector('.konvajs-content').style.cursor = 'crosshair'
     }
 
@@ -221,8 +221,8 @@ window.init = (peaksInstance) => {
   });
 
   window.addEventListener('keyup', (e) => {
-    if (!e.metaKey) {
-      isMetaKeyDown = false;
+    if (!e.ctrlKey) {
+      isCtrlKeyDown = false;
       document.querySelector('.konvajs-content').style.cursor = 'default'
     }
 
@@ -232,9 +232,9 @@ window.init = (peaksInstance) => {
   });
 
   peaksInstance.on("zoomview.mousedown", function (time) {
-    isMetaKeyDownWhenMouseDown = isMetaKeyDown;
+    isCtrlKeyDownWhenMouseDown = isCtrlKeyDown;
     isAltKeyDownWhenMouseDown = isAltKeyDown;
-    if (isMetaKeyDown) {
+    if (isCtrlKeyDown) {
       return;
     }
 
@@ -243,7 +243,7 @@ window.init = (peaksInstance) => {
   });
 
   peaksInstance.on("zoomview.drag", function (time) {
-    if (isMetaKeyDownWhenMouseDown) {
+    if (isCtrlKeyDownWhenMouseDown) {
       peaksInstance.player.seek(time);
       return;
     }

@@ -247,7 +247,7 @@ define([
         event.preventDefault();
 
         // Vertical scroll? If so, zoom
-        if (event.shiftKey) {
+        if (event.shiftKey && self._options.wheelZoom) {
           const seconds = self._peaks.player.getDuration();
 
           if (!Utils.isValidTime(seconds)) {

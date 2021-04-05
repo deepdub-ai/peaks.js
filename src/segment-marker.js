@@ -64,14 +64,16 @@ define([
     var self = this;
 
     if (self._draggable) {
-      self._group.on('dragmove', function() {
+      self._group.on('dragmove', function(/*event*/) {
         self._onDrag(self);
+        // window.onPeaksDragMouseMove(event, self)
       });
 
       self._group.on('dragstart', function(event) {
         self.isAltKeyDownWhenMouseDown = event.evt.altKey
         self.initDragTargetX = event.target.getX()
         self._onDragStart(self);
+        // window.onPeaksDragMouseDown(event, self)
       });
 
       self._group.on('dragend', function() {

@@ -70,6 +70,8 @@ define([
 
     self._data = waveformData;
 
+    self._isSeeking = false;
+
     if (self._width !== 0) {
       try {
         self._data = waveformData.resample({ width: self._width });
@@ -132,6 +134,8 @@ define([
 
     self._mouseDragHandler = new MouseDragHandler(self._stage, {
       onMouseDown: function(mousePosX) {
+        self._isSeeking = true;
+
         mousePosX = Utils.clamp(mousePosX, 0, self._width);
 
         var time = self.pixelsToTime(mousePosX);
@@ -163,6 +167,10 @@ define([
         self._playheadLayer.updatePlayheadTime(time);
 
         self._peaks.player.seek(time);
+      },
+
+      onMouseUp: function() {
+        self._isSeeking = false
       }
     });
 

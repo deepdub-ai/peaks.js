@@ -152,8 +152,12 @@ define([
         this.initPixelIndex = pixelIndex;
         this.initMousePosX = mousePosX;
         var time = self.pixelsToTime(pixelIndex);
-
         self._peaks.emit("zoomview.mousedown", time);
+
+        // TODO use these "hooks" when making further fixes to human interaction
+        // with the zoomview
+        //
+        // window.onPeaksMouseDown(mousePosX, event);
       },
 
       onMouseMove: function (eventType, mousePosX, event) {
@@ -167,6 +171,11 @@ define([
         //   this.initialFrameOffset + diff,
         //   0,
         //   self._pixelLength - self._width
+
+        // window.onPeaksMouseMove(eventType, mousePosX, event, self, this);
+        // if (Math.random() <= 10) {
+        //   return;
+        // }
 
         event.target.requestPointerLock();
 
@@ -326,18 +335,10 @@ define([
   WaveformZoomView.prototype._updateTime = function () {
     const now = performance.now();
 
-    // TODO (dutzi) when using the following check:
-    //
-    // if (this._mouseDragHandler.isDragging() || !this._peaks.player.isPlaying()) {
-    //
-    // we don't update the position of the waveform when the user seeks using
-    // the zoomview, need to find a way to figure out whether or not the user
-    // is doing that.
-    // on the other hand, using this check will cause the playhead to "regain focus"
-    // after the user scrolls the zoomview _while_ playback is paused, which is also
-    // not ideal.
-    //
+    const isPlaying = this._peaks.player.isPlaying();
+    const isSeeking = this._peaks.views.getView("overview")._isSeeking;
     if (
+      (!isPlaying && !isSeeking) ||
       this._mouseDragHandler.isDragging() ||
       now - this.lastUserInteractionTime < 5000
     ) {

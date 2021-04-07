@@ -1,6 +1,6 @@
 {
   "name": "@notdutzi/peaks.js",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "JavaScript UI component for displaying audio waveforms",
   "main": "./peaks.js",
   "files": [

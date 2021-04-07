@@ -143,6 +143,7 @@ define([
       onMouseDown: function (mousePosX, event) {
         this.isAltKeyDownWhenMouseDown = event.evt.altKey;
         this.initialFrameOffset = self._frameOffset;
+        this._isShiftKeyDownOnMouseDown = event.evt.shiftKey;
         this.newFrameOffset = 0;
         this.mouseDownX = mousePosX;
         this.totalMovementX = 0;
@@ -245,11 +246,14 @@ define([
         }
       },
 
-      onMouseUp: function (/* mousePosX */) {
+      onMouseUp: function () {
         document.exitPointerLock();
 
         // Set playhead position only on click release, when not dragging.
-        if (!self._mouseDragHandler.isDragging()) {
+        if (
+          !self._mouseDragHandler.isDragging() &&
+          !this._isShiftKeyDownOnMouseDown
+        ) {
           var mouseDownX = Math.floor(this.mouseDownX);
 
           var pixelIndex = self._frameOffset + mouseDownX;

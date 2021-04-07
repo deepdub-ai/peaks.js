@@ -337,12 +337,17 @@ define([
 
     const isPlaying = this._peaks.player.isPlaying();
     const isSeeking = this._peaks.views.getView("overview")._isSeeking;
+
     if (
       isSeeking ||
       (!isPlaying && !isSeeking) ||
       this._mouseDragHandler.isDragging() ||
       now - this.lastUserInteractionTime < 5000
     ) {
+      this._playheadLayer.updatePlayheadTime(
+        this._peaks.player.getCurrentTime()
+      );
+
       if (!this._cancelRequestAnimationFrame) {
         window.requestAnimationFrame(this._updateTime);
       }

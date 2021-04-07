@@ -148,7 +148,8 @@ define([
       fontFamily: this._playheadFontFamily,
       fontStyle: this._playheadFontStyle,
       fill: color,
-      align: 'right'
+      align: 'right',
+      listening: false,
     });
 
     this._playheadGroup.add(this._playheadText);

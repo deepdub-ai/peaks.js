@@ -428,7 +428,9 @@ define([
   };
 
   WaveformZoomView.prototype._syncPlayhead = function (time, options = {}) {
-    this._playheadLayer.updatePlayheadTime(time);
+    if (!options.persistPlayhead) {
+      this._playheadLayer.updatePlayheadTime(options.playheadTime || time);
+    }
 
     if (this._enableAutoScroll) {
       // Check for the playhead reaching the right-hand side of the window.

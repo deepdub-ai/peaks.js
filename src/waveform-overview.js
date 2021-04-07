@@ -132,69 +132,56 @@ define([
 
     this._playheadLayer.updatePlayheadTime(time);
 
-    self._mouseDragHandler = new MouseDragHandler(self._stage, {
-      onMouseDown: function(mousePosX) {
-        self._isSeeking = true;
+    self._onMouseDownAndMouseMove = (mousePosX) => {
+      if (self._isCtrlSeeking || self._options.overviewSeeksZoomview) {
+        mousePosX = Utils.clamp(mousePosX, 0, self._width);
 
-        if (self._options.overviewSeeksZoomview) {
-          mousePosX = Utils.clamp(mousePosX, 0, self._width);
+        let time = self.pixelsToTime(mousePosX);
+        let timeCentered = self.pixelsToTime(mousePosX - self._highlightLayer._width / 2);
+        const duration = self._getDuration();
 
-          let time = self.pixelsToTime(mousePosX);
-          const duration = self._getDuration();
-
-          // Prevent the playhead position from jumping by limiting click
-          // handling to the waveform duration.
-          if (time > duration) {
-            time = duration;
-          }
-
-          self._playheadLayer.updatePlayheadTime(time);
-
-          peaks.player.seek(time);
-        } else {
-          let time = self.pixelsToTime(mousePosX);
-          const duration = self._getDuration();
-
-          // Prevent the playhead position from jumping by limiting click
-          // handling to the waveform duration.
-          if (time > duration) {
-            time = duration;
-          }
-
-          self._peaks.views.getView('zoomview')._syncPlayhead(time);
+        if (time > duration) {
+          time = duration;
         }
+
+        if (timeCentered > duration) {
+          timeCentered = duration;
+        }
+
+        // Update the playhead position. This gives a smoother visual update
+        // than if we only use the player.timeupdate event.
+        self._playheadLayer.updatePlayheadTime(time);
+
+        self._peaks.player.seek(time);
+        self._peaks.views.getView('zoomview')._syncPlayhead(timeCentered, { exact: true, playheadTime: time });
+      } else {
+        let time = self.pixelsToTime(mousePosX - self._highlightLayer._width / 2);
+        const duration = self._getDuration();
+
+        if (time > duration) {
+          time = duration;
+        }
+        self._peaks.views.getView('zoomview')._syncPlayhead(time, { exact: true, persistPlayhead: true });
+      }
+    }
+
+    self._mouseDragHandler = new MouseDragHandler(self._stage, {
+      onMouseDown: function(mousePosX, event) {
+        self._isSeeking = true;
+        self._isCtrlSeeking = event.evt.ctrlKey;
+        self._onMouseDownAndMouseMove(mousePosX);
       },
 
       onMouseMove: function(eventType, mousePosX) {
-        if (self._options.overviewSeeksZoomview) {
-          mousePosX = Utils.clamp(mousePosX, 0, self._width);
-
-          let time = self.pixelsToTime(mousePosX);
-          const duration = self._getDuration();
-
-          if (time > duration) {
-            time = duration;
-          }
-
-          // Update the playhead position. This gives a smoother visual update
-          // than if we only use the player.timeupdate event.
-          self._playheadLayer.updatePlayheadTime(time);
-
-          self._peaks.player.seek(time);
-        } else {
-          let time = self.pixelsToTime(mousePosX - self._highlightLayer._width / 2);
-          const duration = self._getDuration();
-
-          if (time > duration) {
-            time = duration;
-          }
-          self._peaks.views.getView('zoomview')._syncPlayhead(time, { exact: true });
-        }
+        self._onMouseDownAndMouseMove(mousePosX);
       },
 
       onMouseUp: function() {
         self._isSeeking = false
+        self._isCtrlSeeking = false
       }
+    }, {
+      preventContextMenu: true
     });
 
     this._stage.on('dblclick', function(event) {

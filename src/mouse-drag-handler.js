@@ -44,19 +44,31 @@ define(["konva"], function (Konva) {
    * @param {MouseDragHandlers} handlers
    */
 
-  function MouseDragHandler(stage, handlers) {
+  function MouseDragHandler(stage, handlers, options = {}) {
     this._stage = stage;
     this._handlers = handlers;
     this._dragging = false;
+    this._options = options;
     this._mouseDown = this._mouseDown.bind(this);
     this._mouseUp = this._mouseUp.bind(this);
     this._mouseMove = this._mouseMove.bind(this);
+    this._mouseWheel = this._mouseWheel.bind(this);
+    this._contextMenu = this._contextMenu.bind(this);
 
     this._stage.on("mousedown", this._mouseDown);
     this._stage.on("touchstart", this._mouseDown);
 
+    this._stage.on("contextmenu", this._contextMenu);
+
     this._mouseDownClientX = null;
   }
+
+  MouseDragHandler.prototype._contextMenu = function (event) {
+    if (this._options.preventContextMenu) {
+      event.evt.preventDefault();
+      return false;
+    }
+  };
 
   /**
    * Mouse down event handler.

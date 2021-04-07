@@ -62,9 +62,11 @@ define([
     var startOffset = this._view.timeToPixels(startTime);
     var endOffset   = this._view.timeToPixels(endTime);
 
+    this._width = endOffset - startOffset;
+
     this._highlightRect.setAttrs({
       x:     startOffset,
-      width: endOffset - startOffset
+      width: this._width
     });
 
     this._layer.draw();
@@ -77,11 +79,13 @@ define([
     var startOffset = this._view.timeToPixels(startTime);
     var endOffset   = this._view.timeToPixels(endTime);
 
+    this._width = endOffset - startOffset
+
     // Create with default y and height, the real values are set in fitToView().
     this._highlightRect = new Konva.Rect({
       startOffset:  0,
       y:            0,
-      width:        endOffset - startOffset,
+      width:        this._width,
       stroke:       this._color,
       strokeWidth:  1,
       height:       0,

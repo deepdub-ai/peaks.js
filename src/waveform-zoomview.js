@@ -338,6 +338,7 @@ define([
     const isPlaying = this._peaks.player.isPlaying();
     const isSeeking = this._peaks.views.getView("overview")._isSeeking;
     if (
+      isSeeking ||
       (!isPlaying && !isSeeking) ||
       this._mouseDragHandler.isDragging() ||
       now - this.lastUserInteractionTime < 5000
@@ -426,7 +427,7 @@ define([
     // Don't update the UI here, call setZoom().
   };
 
-  WaveformZoomView.prototype._syncPlayhead = function (time) {
+  WaveformZoomView.prototype._syncPlayhead = function (time, options = {}) {
     this._playheadLayer.updatePlayheadTime(time);
 
     if (this._enableAutoScroll) {
@@ -434,17 +435,21 @@ define([
 
       var pixelIndex = this.timeToPixels(time);
 
-      // TODO: move this code to animation function?
-      // TODO: don't scroll if user has positioned view manually (e.g., using
-      // the keyboard)
-      var endThreshold = this._frameOffset + this._width - 100;
+      if (options.exact) {
+        this._frameOffset = pixelIndex;
+      } else {
+        // TODO: move this code to animation function?
+        // TODO: don't scroll if user has positioned view manually (e.g., using
+        // the keyboard)
+        var endThreshold = this._frameOffset + this._width - 100;
 
-      if (pixelIndex >= endThreshold) {
-        // Nudge the waveform a bit to include the position of the playhead
-        this._frameOffset += pixelIndex - endThreshold;
-      } else if (pixelIndex < this._frameOffset) {
-        // Put the playhead at 100 pixels from the left edge
-        this._frameOffset = pixelIndex - 100;
+        if (pixelIndex >= endThreshold) {
+          // Nudge the waveform a bit to include the position of the playhead
+          this._frameOffset += pixelIndex - endThreshold;
+        } else if (pixelIndex < this._frameOffset) {
+          // Put the playhead at 100 pixels from the left edge
+          this._frameOffset = pixelIndex - 100;
+        }
       }
 
       if (this._frameOffset < 0) {

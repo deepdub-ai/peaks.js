@@ -136,37 +136,60 @@ define([
       onMouseDown: function(mousePosX) {
         self._isSeeking = true;
 
-        mousePosX = Utils.clamp(mousePosX, 0, self._width);
+        if (self._options.overviewSeeksZoomview) {
+          mousePosX = Utils.clamp(mousePosX, 0, self._width);
 
-        var time = self.pixelsToTime(mousePosX);
-        var duration = self._getDuration();
+          let time = self.pixelsToTime(mousePosX);
+          const duration = self._getDuration();
 
-        // Prevent the playhead position from jumping by limiting click
-        // handling to the waveform duration.
-        if (time > duration) {
-          time = duration;
+          // Prevent the playhead position from jumping by limiting click
+          // handling to the waveform duration.
+          if (time > duration) {
+            time = duration;
+          }
+
+          self._playheadLayer.updatePlayheadTime(time);
+
+          peaks.player.seek(time);
+        } else {
+          let time = self.pixelsToTime(mousePosX);
+          const duration = self._getDuration();
+
+          // Prevent the playhead position from jumping by limiting click
+          // handling to the waveform duration.
+          if (time > duration) {
+            time = duration;
+          }
+
+          self._peaks.views.getView('zoomview')._syncPlayhead(time);
         }
-
-        self._playheadLayer.updatePlayheadTime(time);
-
-        peaks.player.seek(time);
       },
 
       onMouseMove: function(eventType, mousePosX) {
-        mousePosX = Utils.clamp(mousePosX, 0, self._width);
+        if (self._options.overviewSeeksZoomview) {
+          mousePosX = Utils.clamp(mousePosX, 0, self._width);
 
-        var time = self.pixelsToTime(mousePosX);
-        var duration = self._getDuration();
+          let time = self.pixelsToTime(mousePosX);
+          const duration = self._getDuration();
 
-        if (time > duration) {
-          time = duration;
+          if (time > duration) {
+            time = duration;
+          }
+
+          // Update the playhead position. This gives a smoother visual update
+          // than if we only use the player.timeupdate event.
+          self._playheadLayer.updatePlayheadTime(time);
+
+          self._peaks.player.seek(time);
+        } else {
+          let time = self.pixelsToTime(mousePosX - self._highlightLayer._width / 2);
+          const duration = self._getDuration();
+
+          if (time > duration) {
+            time = duration;
+          }
+          self._peaks.views.getView('zoomview')._syncPlayhead(time, { exact: true });
         }
-
-        // Update the playhead position. This gives a smoother visual update
-        // than if we only use the player.timeupdate event.
-        self._playheadLayer.updatePlayheadTime(time);
-
-        self._peaks.player.seek(time);
       },
 
       onMouseUp: function() {

@@ -441,6 +441,8 @@ define([
       this._playheadLayer.updatePlayheadTime(options.playheadTime || time);
     }
 
+    const padding = this._options.centerPlayhead ? this._width / 2 : 100;
+
     if (this._enableAutoScroll) {
       // Check for the playhead reaching the right-hand side of the window.
 
@@ -452,14 +454,14 @@ define([
         // TODO: move this code to animation function?
         // TODO: don't scroll if user has positioned view manually (e.g., using
         // the keyboard)
-        var endThreshold = this._frameOffset + this._width - 100;
+        var endThreshold = this._frameOffset + this._width - padding;
 
         if (pixelIndex >= endThreshold) {
           // Nudge the waveform a bit to include the position of the playhead
           this._frameOffset += pixelIndex - endThreshold;
         } else if (pixelIndex < this._frameOffset) {
-          // Put the playhead at 100 pixels from the left edge
-          this._frameOffset = pixelIndex - 100;
+          // Put the playhead at width / 2 (or 100) pixels from the left edge
+          this._frameOffset = pixelIndex - padding;
         }
       }
 

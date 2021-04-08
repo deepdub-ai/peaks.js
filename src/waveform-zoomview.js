@@ -328,13 +328,13 @@ define([
     return "zoomview";
   };
 
-  WaveformZoomView.prototype._onTimeUpdate = function (time) {
-    if (this._mouseDragHandler.isDragging()) {
-      return;
-    }
+  // WaveformZoomView.prototype._onTimeUpdate = function(time) {
+  //   if (this._mouseDragHandler.isDragging()) {
+  //     return;
+  //   }
 
-    this._syncPlayhead(time);
-  };
+  //   this._syncPlayhead(time);
+  // };
 
   WaveformZoomView.prototype._updateTime = function () {
     const now = performance.now();
@@ -345,7 +345,8 @@ define([
     if (
       isSeeking ||
       (!isPlaying && !isSeeking) ||
-      this._mouseDragHandler.isDragging() ||
+      (this._options.detachPlayheadOnDrag &&
+        this._mouseDragHandler.isDragging()) ||
       now - this.lastUserInteractionTime < 5000
     ) {
       this._playheadLayer.updatePlayheadTime(

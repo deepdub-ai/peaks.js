@@ -158,7 +158,7 @@ define([
         // TODO use these "hooks" when making further fixes to human interaction
         // with the zoomview
         //
-        // window.onPeaksMouseDown(mousePosX, event);
+        // window.onPeaksMouseDown.bind(this)(mousePosX, event);
       },
 
       onMouseMove: function (eventType, mousePosX, event) {
@@ -174,6 +174,7 @@ define([
         //   self._pixelLength - self._width
 
         // window.onPeaksMouseMove(eventType, mousePosX, event, self, this);
+
         // if (Math.random() <= 10) {
         //   return;
         // }
@@ -201,9 +202,9 @@ define([
           const padding = 100;
           const absMousePos = mousePos + this.initialFrameOffset;
           let offset = 0;
-          if (absMousePos < self._frameOffset + 100) {
+          if (absMousePos < self._frameOffset + padding) {
             offset =
-              self._frameOffset + (absMousePos - self._frameOffset - 100);
+              self._frameOffset + (absMousePos - self._frameOffset - padding);
           } else if (absMousePos > self._frameOffset + width - padding) {
             offset =
               self._frameOffset +
@@ -270,8 +271,7 @@ define([
           self._playheadLayer.updatePlayheadTime(time);
 
           self._peaks.player.seek(time);
-        } else {
-          self._peaks.emit("zoomview.mouseup");
+          self._peaks.emit("zoomview.mouseup", time);
         }
       },
 

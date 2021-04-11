@@ -251,28 +251,28 @@ define([
         document.exitPointerLock();
 
         // Set playhead position only on click release, when not dragging.
+        var mouseDownX = Math.floor(this.mouseDownX);
+
+        var pixelIndex = self._frameOffset + mouseDownX;
+
+        var time = self.pixelsToTime(pixelIndex);
+        var duration = self._getDuration();
+
+        // Prevent the playhead position from jumping by limiting click
+        // handling to the waveform duration.
+        if (time > duration) {
+          time = duration;
+        }
+
         if (
           !self._mouseDragHandler.isDragging() &&
           !this._isShiftKeyDownOnMouseDown
         ) {
-          var mouseDownX = Math.floor(this.mouseDownX);
-
-          var pixelIndex = self._frameOffset + mouseDownX;
-
-          var time = self.pixelsToTime(pixelIndex);
-          var duration = self._getDuration();
-
-          // Prevent the playhead position from jumping by limiting click
-          // handling to the waveform duration.
-          if (time > duration) {
-            time = duration;
-          }
-
           self._playheadLayer.updatePlayheadTime(time);
-
           self._peaks.player.seek(time);
-          self._peaks.emit("zoomview.mouseup", time);
         }
+
+        self._peaks.emit("zoomview.mouseup", time);
       },
 
       onMouseWheel: function (event) {

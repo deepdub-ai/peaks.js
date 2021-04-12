@@ -50,7 +50,7 @@ define([
     self._peaks = peaks;
 
     // Bind event handlers
-    self._onTimeUpdate = self._onTimeUpdate.bind(self);
+    // self._onTimeUpdate = self._onTimeUpdate.bind(self);
     self._onPlay = self._onPlay.bind(self);
     self._onPause = self._onPause.bind(self);
     self._onWindowResize = self._onWindowResize.bind(self);
@@ -58,9 +58,10 @@ define([
     self._onKeyboardRight = self._onKeyboardRight.bind(self);
     self._onKeyboardShiftLeft = self._onKeyboardShiftLeft.bind(self);
     self._onKeyboardShiftRight = self._onKeyboardShiftRight.bind(self);
+    self._updateTime = self._updateTime.bind(self);
 
     // Register event handlers
-    self._peaks.on("player.timeupdate", self._onTimeUpdate);
+    // self._peaks.on('player.timeupdate', self._onTimeUpdate);
     self._peaks.on("player.play", self._onPlay);
     self._peaks.on("player.pause", self._onPause);
     self._peaks.on("window_resize", self._onWindowResize);
@@ -68,6 +69,8 @@ define([
     self._peaks.on("keyboard.right", self._onKeyboardRight);
     self._peaks.on("keyboard.shift_left", self._onKeyboardShiftLeft);
     self._peaks.on("keyboard.shift_right", self._onKeyboardShiftRight);
+
+    window.requestAnimationFrame(self._updateTime);
 
     self._enableAutoScroll = true;
     self._amplitudeScale = 1.0;
@@ -264,6 +267,8 @@ define([
           return;
         }
 
+        self.lastUserInteractionTime = performance.now();
+
         event.preventDefault();
 
         // Vertical scroll? If so, zoom
@@ -316,6 +321,36 @@ define([
     }
 
     this._syncPlayhead(time);
+  };
+
+  WaveformZoomView.prototype._updateTime = function () {
+    const now = performance.now();
+
+    // TODO (dutzi) when using the following check:
+    //
+    // if (this._mouseDragHandler.isDragging() || !this._peaks.player.isPlaying()) {
+    //
+    // we don't update the position of the waveform when the user seeks using
+    // the zoomview, need to find a way to figure out whether or not the user
+    // is doing that.
+    // on the other hand, using this check will cause the playhead to "regain focus"
+    // after the user scrolls the zoomview _while_ playback is paused, which is also
+    // not ideal.
+    //
+    if (
+      this._mouseDragHandler.isDragging() ||
+      now - this.lastUserInteractionTime < 5000
+    ) {
+      if (!this._cancelRequestAnimationFrame) {
+        window.requestAnimationFrame(this._updateTime);
+      }
+      return;
+    }
+
+    this._syncPlayhead(this._peaks.player.getCurrentTime());
+    if (!this._cancelRequestAnimationFrame) {
+      window.requestAnimationFrame(this._updateTime);
+    }
   };
 
   WaveformZoomView.prototype._onPlay = function (time) {
@@ -403,16 +438,19 @@ define([
       // the keyboard)
       var endThreshold = this._frameOffset + this._width - 100;
 
-      if (pixelIndex >= endThreshold || pixelIndex < this._frameOffset) {
+      if (pixelIndex >= endThreshold) {
+        // Nudge the waveform a bit to include the position of the playhead
+        this._frameOffset += pixelIndex - endThreshold;
+      } else if (pixelIndex < this._frameOffset) {
         // Put the playhead at 100 pixels from the left edge
         this._frameOffset = pixelIndex - 100;
-
-        if (this._frameOffset < 0) {
-          this._frameOffset = 0;
-        }
-
-        this._updateWaveform(this._frameOffset);
       }
+
+      if (this._frameOffset < 0) {
+        this._frameOffset = 0;
+      }
+
+      this._updateWaveform(this._frameOffset);
     }
   };
 
@@ -825,7 +863,7 @@ define([
     }
 
     // Unregister event handlers
-    this._peaks.off("player.timeupdate", this._onTimeUpdate);
+    // this._peaks.off('player.timeupdate', this._onTimeUpdate);
     this._peaks.off("player.play", this._onPlay);
     this._peaks.off("player.pause", this._onPause);
     this._peaks.off("window_resize", this._onWindowResize);
@@ -833,6 +871,8 @@ define([
     this._peaks.off("keyboard.right", this._onKeyboardRight);
     this._peaks.off("keyboard.shift_left", this._onKeyboardShiftLeft);
     this._peaks.off("keyboard.shift_right", this._onKeyboardShiftRight);
+
+    this._cancelRequestAnimationFrame = true;
 
     this._playheadLayer.destroy();
     this._segmentsLayer.destroy();

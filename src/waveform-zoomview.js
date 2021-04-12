@@ -155,7 +155,7 @@ define([
         this.initPixelIndex = pixelIndex;
         this.initMousePosX = mousePosX;
         var time = self.pixelsToTime(pixelIndex);
-        self._peaks.emit("zoomview.mousedown", time);
+        self._peaks.emit("zoomview.mousedown", time, event);
 
         // TODO use these "hooks" when making further fixes to human interaction
         // with the zoomview
@@ -228,7 +228,7 @@ define([
           this.totalMovementX += event.movementX;
           const time = calculateTime();
 
-          self._peaks.emit("zoomview.drag", time);
+          self._peaks.emit("zoomview.drag", time, event);
 
           if (event.ctrlKey) {
             self._playheadLayer.updatePlayheadTime(time);

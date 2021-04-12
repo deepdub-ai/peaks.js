@@ -193,7 +193,7 @@ define([
    * @param {Boolean} loop If true, playback is looped.
    */
 
-  Player.prototype.playSegment = function(segment, loop, fadeIn, fadeOut) {
+  Player.prototype.playSegment = function(segment, { loop, fadeIn, fadeOut, startOffset = 0 } = { startOffset: 0 }) {
     var self = this;
 
     if (!segment ||
@@ -210,7 +210,7 @@ define([
     self._loop = loop;
 
     // Set audio time to segment start time
-    self.seek(segment.startTime);
+    self.seek(segment.startTime + startOffset);
 
     if (fadeIn) {
       self._adapter._mediaElement.volume = 0;

@@ -104,9 +104,9 @@ define(['./utils', 'konva'], function(Utils, Konva) {
     this._drawWaveform(
       context,
       this._view.getWaveformData(),
-      frameOffset,
-      this._segment ? this._view.timeToPixels(this._segment.startTime) : frameOffset,
-      this._segment ? this._view.timeToPixels(this._segment.endTime)   : frameOffset + width,
+      Math.round(frameOffset),
+      Math.round(this._segment ? this._view.timeToPixels(this._segment.startTime) : frameOffset),
+      Math.floor(this._segment ? this._view.timeToPixels(this._segment.endTime)   : frameOffset + width),
       width,
       height
     );

@@ -280,6 +280,18 @@ define([
     return this._playheadPixel;
   };
 
+  PlayheadLayer.prototype.addToPlayhead = function(indicator) {
+    if (this._indicator) {
+      this._indicator.remove()
+    }
+
+    this._indicator = indicator;
+
+    if (this._indicator) {
+      this._playheadGroup.add(this._indicator);
+    }
+  }
+
   PlayheadLayer.prototype.showPlayheadTime = function(show) {
     var updated = false;
 

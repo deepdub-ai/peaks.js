@@ -851,6 +851,9 @@ define([
     this._playheadLayer.setPlayheadLineColor(color);
   };
 
+  WaveformZoomView.prototype.addToPlayhead = function(indicator) {
+    this._playheadLayer.addToPlayhead(indicator);
+  }
   /* WaveformZoomView.prototype.beginZoom = function() {
     // Fade out the time axis and the segments
     // this._axis.axisShape.setAttr('opacity', 0);

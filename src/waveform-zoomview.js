@@ -97,6 +97,8 @@ define([
     // The pixel offset of the current frame being displayed
     self._frameOffset = 0;
 
+    self._zoomviewPaddingTop = self._options.zoomviewPaddingTop || 0;
+
     self._stage = new Konva.Stage({
       container: container,
       width: self._width,
@@ -107,7 +109,7 @@ define([
 
     self._createWaveform();
 
-    self._segmentsLayer = new SegmentsLayer(peaks, self, true);
+    self._segmentsLayer = new SegmentsLayer(peaks, self, true, self._zoomviewPaddingTop);
     self._segmentsLayer.addToStage(self._stage);
 
     self._pointsLayer = new PointsLayer(peaks, self, true);
@@ -708,6 +710,7 @@ define([
       color: this._options.zoomWaveformColor,
       view: this,
       pattern: this._peaks.options.zoomviewPattern,
+      paddingTop: this._zoomviewPaddingTop,
     });
 
     this._waveformLayer.add(this._waveformShape);
@@ -725,6 +728,7 @@ define([
       axisLabelFontFamily: this._options.fontFamily,
       axisLabelFontSize: this._options.fontSize,
       axisLabelFontStyle: this._options.fontStyle,
+      paddingTop: this._zoomviewPaddingTop,
     });
 
     this._axis.addToLayer(this._axisLayer);

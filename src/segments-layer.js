@@ -28,10 +28,11 @@ define([
    * @param {Boolean} allowEditing
    */
 
-  function SegmentsLayer(peaks, view, allowEditing) {
+  function SegmentsLayer(peaks, view, allowEditing, paddingTop) {
     this._peaks         = peaks;
     this._view          = view;
     this._allowEditing  = allowEditing;
+    this._paddingTop    = paddingTop;
     this._segmentShapes = {};
     this._layer         = new Konva.Layer();
 
@@ -142,7 +143,7 @@ define([
    */
 
   SegmentsLayer.prototype._createSegmentShape = function(segment) {
-    return new SegmentShape(segment, this._peaks, this, this._view);
+    return new SegmentShape(segment, this._peaks, this, this._view, this._paddingTop);
   };
 
   /**

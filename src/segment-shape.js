@@ -30,11 +30,12 @@ define([
    * @param {WaveformOverview|WaveformZoomView} view
    */
 
-  function SegmentShape(segment, peaks, layer, view) {
+  function SegmentShape(segment, peaks, layer, view, paddingTop) {
     this._segment       = segment;
     this._peaks         = peaks;
     this._layer         = layer;
     this._view          = view;
+    this._paddingTop    = paddingTop || 0;
     this._waveformShape = null;
     this._label         = null;
     this._startMarker   = null;
@@ -44,7 +45,8 @@ define([
     this._waveformShape = new WaveformShape({
       color:   segment.color,
       view:    view,
-      segment: segment
+      segment: segment,
+      paddingTop: this._paddingTop,
     });
 
     this._onMouseEnter = this._onMouseEnter.bind(this);
@@ -145,7 +147,8 @@ define([
       fontStyle:    this._peaks.options.fontStyle || defaultFontShape,
       layer:        this._layer,
       view:         this._view.getName(),
-      getEndMarker: () => this._endMarker
+      getEndMarker: () => this._endMarker,
+      paddingTop:   this._paddingTop,
     });
 
     if (startMarker) {
@@ -173,7 +176,8 @@ define([
       fontStyle:    this._peaks.options.fontStyle || defaultFontShape,
       layer:        this._layer,
       view:         this._view.getName(),
-      getStartMarker: () => this._startMarker
+      getStartMarker: () => this._startMarker,
+      paddingTop:   this._paddingTop,
     });
 
     if (endMarker) {

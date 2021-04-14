@@ -39,6 +39,8 @@ define([
       options.axisLabelFontStyle
     );
 
+    self._paddingTop = options.paddingTop || 0;
+
     self._axisShape = new Konva.Shape({
       sceneFunc: function(context) {
         self.drawAxis(context, view);
@@ -143,6 +145,15 @@ define([
     var width  = view.getWidth();
     var height = view.getHeight();
 
+    const paddingTop = this._paddingTop;
+
+    if (paddingTop !== 0) {
+      context.beginPath();
+      context.moveTo(0, paddingTop);
+      context.lineTo(width, paddingTop);
+      context.stroke();
+    }
+
     for (;;) {
       // Position of axis marker (pixels)
       x = axisLabelOffsetPixels + view.timeToPixels(secs - firstAxisLabelSecs);
@@ -151,8 +162,8 @@ define([
       }
 
       context.beginPath();
-      context.moveTo(x + 0.5, 0);
-      context.lineTo(x + 0.5, 0 + markerHeight);
+      context.moveTo(x + 0.5, paddingTop);
+      context.lineTo(x + 0.5, paddingTop + markerHeight);
       context.moveTo(x + 0.5, height);
       context.lineTo(x + 0.5, height - markerHeight);
       context.stroke();

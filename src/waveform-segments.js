@@ -209,7 +209,7 @@ define([
     segments = segments.map(function(segmentOptions) {
       var segment = self._createSegment(segmentOptions);
 
-      if (Utils.objectHasProperty(self._segmentsById, segment.id)) {
+      if (Utils.objectHasProperty(self._segmentsById, segment.id) && !(self._segmentsById[segment.id].isHidden())) {
         throw new Error('peaks.segments.add(): duplicate id');
       }
 
@@ -317,6 +317,24 @@ define([
     return this._removeSegments(function(segment) {
       return segment.id === segmentId;
     });
+  };
+
+  /**
+   * Removes any segments with the given id.
+   * 
+   * This method first hides it, the defers that segment's removal.
+   *
+   * @param {String} id
+   */
+
+  WaveformSegments.prototype.deferRemoveById = function(segmentId) {
+    this._peaks.emit('segments.hide', [this._segmentsById[segmentId]])
+    
+    setTimeout(() => {
+      this._removeSegments(function(segment) {
+        return segment.id === segmentId;
+      });
+    }, 0);
   };
 
   /**

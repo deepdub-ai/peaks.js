@@ -284,6 +284,16 @@ define([
     this._waveformShape.setWaveformColor(this._color);
   };
 
+  SegmentShape.prototype.hide = function() {
+    if (this._startMarker) {
+      this._startMarker.hide();
+    }
+
+    if (this._endMarker) {
+      this._endMarker.hide();
+    }
+  };
+
   SegmentShape.prototype.destroy = function() {
     this._waveformShape.destroy();
 

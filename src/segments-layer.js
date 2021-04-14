@@ -39,12 +39,14 @@ define([
     this._onSegmentsUpdate    = this._onSegmentsUpdate.bind(this);
     this._onSegmentsAdd       = this._onSegmentsAdd.bind(this);
     this._onSegmentsRemove    = this._onSegmentsRemove.bind(this);
+    this._onSegmentsHide      = this._onSegmentsHide.bind(this);
     this._onSegmentsRemoveAll = this._onSegmentsRemoveAll.bind(this);
     this._onSegmentsDragged   = this._onSegmentsDragged.bind(this);
 
     this._peaks.on('segments.update', this._onSegmentsUpdate);
     this._peaks.on('segments.add', this._onSegmentsAdd);
     this._peaks.on('segments.remove', this._onSegmentsRemove);
+    this._peaks.on('segments.hide', this._onSegmentsHide);
     this._peaks.on('segments.remove_all', this._onSegmentsRemoveAll);
     this._peaks.on('segments.dragged', this._onSegmentsDragged);
   }
@@ -110,6 +112,16 @@ define([
     });
 
     self.updateSegments(frameStartTime, frameEndTime);
+  };
+
+  SegmentsLayer.prototype._onSegmentsHide = function(segments) {
+    var self = this;
+
+    segments.forEach(function(segment) {
+      self._hideSegment(segment);
+    });
+
+    self._layer.draw();
   };
 
   SegmentsLayer.prototype._onSegmentsRemove = function(segments) {
@@ -254,6 +266,15 @@ define([
     if (segmentShape) {
       segmentShape.destroy();
       delete this._segmentShapes[segment.id];
+    }
+  };
+
+  SegmentsLayer.prototype._hideSegment = function(segment) {
+    var segmentShape = this._segmentShapes[segment.id];
+
+    if (segmentShape) {
+      segmentShape.hide();
+      segment.isHidden(true)
     }
   };
 

@@ -98,6 +98,10 @@ define(['./utils', 'konva'], function(Utils, Konva) {
   };
 
   WaveformShape.prototype._sceneFunc = function(context) {
+    if (this._segment && this._segment.isHidden()) {
+      return
+    }
+    
     const paddingTop = this._paddingTop;
 
     var frameOffset = this._view.getFrameOffset();

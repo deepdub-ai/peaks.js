@@ -155,6 +155,10 @@ define([
     }
   };
 
+  SegmentMarker.prototype.hide = function() {
+    this._group.hide();
+  };
+
   SegmentMarker.prototype.destroy = function() {
     if (this._marker.destroy) {
       this._marker.destroy();

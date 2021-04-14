@@ -86,6 +86,7 @@ define([
     this._labelText = options.labelText;
     this._color     = options.color;
     this._editable  = options.editable;
+    this._isHidden  = false
 
     this._setUserData(options);
   }
@@ -177,6 +178,14 @@ define([
 
   Segment.prototype._setStartTime = function(time) {
     this._startTime = time;
+  };
+
+  Segment.prototype.isHidden = function(value) {
+    if (value !== undefined) {
+      this._isHidden = value;
+    }
+
+    return this._isHidden;
   };
 
   Segment.prototype._setEndTime = function(time) {

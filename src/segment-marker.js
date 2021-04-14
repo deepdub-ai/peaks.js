@@ -44,6 +44,9 @@ define([
     this._layer         = options.layer;
     this._startMarker   = options.startMarker;
 
+    // TODO add this to peaks.options
+    this._handleDrag    = false;
+
     this._onDrag      = options.onDrag;
     this._onDragStart = options.onDragStart;
     this._onDragEnd   = options.onDragEnd;
@@ -63,7 +66,7 @@ define([
   SegmentMarker.prototype._bindDefaultEventHandlers = function() {
     var self = this;
 
-    if (self._draggable) {
+    if (self._draggable && self._handleDrag) {
       self._group.on('dragmove', function(/*event*/) {
         self._onDrag(self);
         // window.onPeaksDragMouseMove(event, self)
@@ -79,7 +82,9 @@ define([
       self._group.on('dragend', function() {
         self._onDragEnd(self);
       });
+    }
 
+    if (self._draggable) {
       self._group.on('mouseenter', function() {
         self._layer._layer.getStage().container().style.cursor = 'grab';
       });

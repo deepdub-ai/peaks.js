@@ -55,6 +55,9 @@ define(["konva"], function (Konva) {
     this._mouseWheel = this._mouseWheel.bind(this);
     this._contextMenu = this._contextMenu.bind(this);
 
+    // TODO add to peaks.options
+    this._handleDrag = false
+
     this._stage.on("mousedown", this._mouseDown);
     this._stage.on("touchstart", this._mouseDown);
 
@@ -79,11 +82,13 @@ define(["konva"], function (Konva) {
    */
 
   MouseDragHandler.prototype._mouseDown = function (event) {
-    var marker = getMarkerObject(event.target);
-
-    // Avoid interfering with drag/drop of point and segment markers.
-    if (marker && marker.attrs.draggable) {
-      return;
+    if (this.__handleDrag) {
+      var marker = getMarkerObject(event.target);
+  
+      // Avoid interfering with drag/drop of point and segment markers.
+      if (marker && marker.attrs.draggable) {
+        return;
+      }
     }
 
     if (event.type === "touchstart") {

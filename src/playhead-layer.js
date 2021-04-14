@@ -131,6 +131,7 @@ define([
     this._playheadGroup = new Konva.Group({
       x: 0,
       y: this._paddingTop,
+      listening: false,
     });
 
     this._playheadGroup.add(this._playheadLine);

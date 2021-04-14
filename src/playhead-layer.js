@@ -37,6 +37,8 @@ define([
     this._playheadVisible = false;
     this._playheadColor = options.playheadColor;
     this._playheadTextColor = options.playheadTextColor;
+    
+    this._paddingTop = options.paddingTop;
 
     this._playheadFontFamily = options.playheadFontFamily || 'sans-serif';
     this._playheadFontSize = options.playheadFontSize || 11;
@@ -128,7 +130,7 @@ define([
 
     this._playheadGroup = new Konva.Group({
       x: 0,
-      y: 0
+      y: this._paddingTop,
     });
 
     this._playheadGroup.add(this._playheadLine);

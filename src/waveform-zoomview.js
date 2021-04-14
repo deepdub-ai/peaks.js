@@ -112,7 +112,7 @@ define([
     self._segmentsLayer = new SegmentsLayer(peaks, self, true, self._zoomviewPaddingTop);
     self._segmentsLayer.addToStage(self._stage);
 
-    self._pointsLayer = new PointsLayer(peaks, self, true);
+    self._pointsLayer = new PointsLayer(peaks, self, true, self._zoomviewPaddingTop);
     self._pointsLayer.addToStage(self._stage);
 
     if (!self._options.hideAxis) {
@@ -128,6 +128,7 @@ define([
       playheadFontFamily: self._options.fontFamily,
       playheadFontSize: self._options.fontSize,
       playheadFontStyle: self._options.fontStyle,
+      paddingTop: self._zoomviewPaddingTop,
     });
 
     self._playheadLayer.addToStage(self._stage);

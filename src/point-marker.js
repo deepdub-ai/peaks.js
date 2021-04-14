@@ -41,6 +41,8 @@ define([
     this._marker    = options.marker;
     this._draggable = options.draggable;
 
+    this._paddingTop = options.paddingTop || 0;
+
     this._onDblClick   = options.onDblClick;
     this._onDragStart  = options.onDragStart;
     this._onDragMove   = options.onDragMove;
@@ -52,7 +54,8 @@ define([
 
     this._group = new Konva.Group({
       draggable:     this._draggable,
-      dragBoundFunc: this._dragBoundFunc
+      dragBoundFunc: this._dragBoundFunc,
+      y:             this._paddingTop
     });
 
     this._bindDefaultEventHandlers();

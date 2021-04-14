@@ -32,11 +32,14 @@ define([
    * @param {Boolean} allowEditing
    */
 
-  function PointsLayer(peaks, view, allowEditing) {
+  function PointsLayer(peaks, view, allowEditing, paddingTop) {
     this._peaks        = peaks;
     this._view         = view;
     this._allowEditing = allowEditing;
     this._pointMarkers = {};
+
+    this._paddingTop   = paddingTop;
+
     this._layer        = new Konva.Layer();
 
     this._onPointsDrag = this._onPointsDrag.bind(this);
@@ -168,7 +171,8 @@ define([
       onDragMove:   this._onPointHandleDragMove,
       onDragEnd:    this._onPointHandleDragEnd,
       onMouseEnter: this._onPointHandleMouseEnter,
-      onMouseLeave: this._onPointHandleMouseLeave
+      onMouseLeave: this._onPointHandleMouseLeave,
+      paddingTop:   this._paddingTop,
     });
   };
 

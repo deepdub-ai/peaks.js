@@ -307,11 +307,8 @@ define([
             scale: Utils.clamp(targetScale, waveformDataScale, maxScale),
           });
         } else {
-          var newFrameOffset = Utils.clamp(
-            self._frameOffset + event.deltaX,
-            0,
-            self._pixelLength - self._width
-          );
+          const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY
+          var newFrameOffset = Utils.clamp(self._frameOffset + delta, 0, self._pixelLength - self._width);
 
           self._updateWaveform(newFrameOffset);
         }

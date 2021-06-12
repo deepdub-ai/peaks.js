@@ -41,13 +41,16 @@ define([
     this._startMarker   = null;
     this._endMarker     = null;
     this._color         = segment.color;
+    this._showWaveform  = !segment.hideWaveform;
 
-    this._waveformShape = new WaveformShape({
-      color:   segment.color,
-      view:    view,
-      segment: segment,
-      paddingTop: this._paddingTop,
-    });
+    if (this._showWaveform) {
+      this._waveformShape = new WaveformShape({
+        color:   segment.color,
+        view:    view,
+        segment: segment,
+        paddingTop: this._paddingTop,
+      });
+    }
 
     this._onMouseEnter = this._onMouseEnter.bind(this);
     this._onMouseLeave = this._onMouseLeave.bind(this);
@@ -55,9 +58,11 @@ define([
 
     // Set up event handlers to show/hide the segment label text when the user
     // hovers the mouse over the segment.
-    this._waveformShape.on('mouseenter', this._onMouseEnter);
-    this._waveformShape.on('mouseleave', this._onMouseLeave);
-    this._waveformShape.on('click', this._onClick);
+    if (this._showWaveform) {
+      this._waveformShape.on('mouseenter', this._onMouseEnter);
+      this._waveformShape.on('mouseleave', this._onMouseLeave);
+      this._waveformShape.on('click', this._onClick);
+    }
 
     // Event handlers for markers
     this._onSegmentHandleDrag      = this._onSegmentHandleDrag.bind(this);
@@ -115,7 +120,9 @@ define([
   };
 
   SegmentShape.prototype.addToLayer = function(layer) {
-    layer.add(this._waveformShape);
+    if (this._showWaveform) {
+      layer.add(this._waveformShape);
+    }
 
     if (this._label) {
       layer.add(this._label);
@@ -281,7 +288,9 @@ define([
       this._endMarker.fitToView();
     }
 
-    this._waveformShape.setWaveformColor(this._color);
+    if (this._showWaveform) {
+      this._waveformShape.setWaveformColor(this._color);
+    }
   };
 
   SegmentShape.prototype.hide = function() {
@@ -295,7 +304,9 @@ define([
   };
 
   SegmentShape.prototype.destroy = function() {
-    this._waveformShape.destroy();
+    if (this._showWaveform) {
+      this._waveformShape.destroy();
+    }
 
     if (this._label) {
       this._label.destroy();

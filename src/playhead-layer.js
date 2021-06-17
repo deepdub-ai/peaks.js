@@ -37,14 +37,14 @@ define([
     this._playheadVisible = false;
     this._playheadColor = options.playheadColor;
     this._playheadTextColor = options.playheadTextColor;
-    
+
     this._paddingTop = options.paddingTop;
 
     this._playheadFontFamily = options.playheadFontFamily || 'sans-serif';
     this._playheadFontSize = options.playheadFontSize || 11;
     this._playheadFontStyle = options.playheadFontStyle || 'normal';
 
-    this._playheadLayer = new Konva.Layer();
+    this._playheadLayer = new Konva.Layer({ listening: false });
 
     this._createPlayhead(this._playheadColor);
 

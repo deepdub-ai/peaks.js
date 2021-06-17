@@ -55,7 +55,8 @@ define([
     this._group = new Konva.Group({
       draggable:     this._draggable,
       dragBoundFunc: this._dragBoundFunc,
-      y:             this._paddingTop
+      y:             this._paddingTop,
+      listening:     false,
     });
 
     this._bindDefaultEventHandlers();

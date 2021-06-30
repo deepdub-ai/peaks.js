@@ -457,10 +457,6 @@ define([
     this._playheadLayer.setPlayheadLineColor(color)
   }
 
-  // WaveformOverview.prototype.drawLastBar = function(color) {
-  //   this._waveformShape.drawLastBar(color);
-  // };
-
   WaveformOverview.prototype.destroy = function() {
     if (this._resizeTimeoutId) {
       clearTimeout(this._resizeTimeoutId);

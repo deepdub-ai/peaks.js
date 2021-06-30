@@ -856,10 +856,6 @@ define([
     this._playheadLayer.setPlayheadLineColor(color);
   };
 
-  // WaveformZoomView.prototype.drawLastBar = function(color) {
-  //   this._waveformShape.drawLastBar(color);
-  // };
-
   WaveformZoomView.prototype.addToPlayhead = function (indicator) {
     this._playheadLayer.addToPlayhead(indicator);
   };

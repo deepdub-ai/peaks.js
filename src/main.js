@@ -551,20 +551,6 @@ define([
     waveformData[offset+ 1] = max
     zoomviewWaveformData[offset] = min
     zoomviewWaveformData[offset+1] = max
-
-    // Code for pushing a new bar:
-    //
-    // this._waveformData._adapter._data.data.length++
-    // this._waveformData._adapter._data.data.push(min, max)
-    // const zoomviewWaveform = this.views.getView('zoomview')._data
-    // zoomviewWaveform._adapter._data.data.length++;
-    // zoomviewWaveform._adapter._data.data.push(min, max)
-    // // this._waveformData.length++;
-    // this.views.getView('overview').drawLastBar(color);
-    // this.views.getView('zoomview').drawLastBar(color);
-    // this.views.getView('overview')._pixelLength += (94 / 61);
-    // this.views.getView('zoomview')._pixelLength += (94 / 61);
-    // // self.views.getView('zoomview').drawLastBar()
   };
 
   Peaks.prototype.setSource = function(options, callback) {

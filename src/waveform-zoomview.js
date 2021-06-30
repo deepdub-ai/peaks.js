@@ -399,7 +399,7 @@ define([
 
         self._resizeTimeoutId = setTimeout(function () {
           self._width = width;
-          self._data = self._originalWaveformData.resample(width);
+          self._data = self._originalWaveformData.resample({ width: self._width, scale: 1 });
           self._stage.width(width);
 
           self._updateWaveform(self._frameOffset);
@@ -709,6 +709,7 @@ define([
       view: this,
       pattern: this._peaks.options.zoomviewPattern,
       paddingTop: this._zoomviewPaddingTop,
+      type: this._options.type
     });
 
     this._waveformLayer.add(this._waveformShape);

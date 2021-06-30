@@ -34,6 +34,7 @@ define(['./utils', 'konva'], function(Utils, Konva) {
   function WaveformShape(options) {
     this._color = options.color;
     this._paddingTop = options.paddingTop || 0;
+    this._type = options.type || 'playback';
 
     var shapeOptions = {};
 
@@ -98,10 +99,16 @@ define(['./utils', 'konva'], function(Utils, Konva) {
   };
 
   WaveformShape.prototype._sceneFunc = function(context) {
+    if (context) {
+      this._prevContext = context
+    } else {
+      context = this._prevContext
+    }
+
     if (this._segment && this._segment.isHidden()) {
       return
     }
-    
+
     const paddingTop = this._paddingTop;
 
     var frameOffset = this._view.getFrameOffset();
@@ -198,6 +205,19 @@ define(['./utils', 'konva'], function(Utils, Konva) {
     var amplitudeScale = this._view.getAmplitudeScale();
 
     var lineX, lineY;
+
+    if (this._type === 'recording') {
+      context.beginPath();
+      context.strokeStyle = '#bbbbbb';
+
+      for (x = startPixels; x < endPixels + startPixels - 10; x += 60) {
+        lineX = x - startPixels - frameOffset;
+        context.moveTo(lineX, 0);
+        context.lineTo(lineX, 265);
+      }
+      context.stroke();
+      context.closePath();
+    }
 
     context.beginPath();
 

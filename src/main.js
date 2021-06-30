@@ -543,6 +543,16 @@ define([
    * @param {Function} callback
    */
 
+  Peaks.prototype.setWaveformDataAt = function(offset, min, max) {
+    const waveformData = this._waveformData._adapter._data.data
+    const zoomviewWaveformData = this.views.getView('zoomview')._data._adapter._data.data
+
+    waveformData[offset] = min
+    waveformData[offset+ 1] = max
+    zoomviewWaveformData[offset] = min
+    zoomviewWaveformData[offset+1] = max
+  };
+
   Peaks.prototype.setSource = function(options, callback) {
     var self = this;
 

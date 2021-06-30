@@ -34,6 +34,7 @@ define(['./utils', 'konva'], function(Utils, Konva) {
   function WaveformShape(options) {
     this._color = options.color;
     this._paddingTop = options.paddingTop || 0;
+    this._type = options.type || 'playback';
 
     var shapeOptions = {};
 
@@ -98,10 +99,16 @@ define(['./utils', 'konva'], function(Utils, Konva) {
   };
 
   WaveformShape.prototype._sceneFunc = function(context) {
+    if (context) {
+      this._prevContext = context
+    } else {
+      context = this._prevContext
+    }
+
     if (this._segment && this._segment.isHidden()) {
       return
     }
-    
+
     const paddingTop = this._paddingTop;
 
     var frameOffset = this._view.getFrameOffset();
@@ -119,6 +126,10 @@ define(['./utils', 'konva'], function(Utils, Konva) {
       paddingTop
     );
   };
+
+  // WaveformShape.prototype.drawLastBar = function(color) {
+  //   this._sceneFunc(color)
+  // };
 
   /**
    * Draws a waveform on a canvas context.
@@ -161,6 +172,23 @@ define(['./utils', 'konva'], function(Utils, Konva) {
         waveformHeight = height - (channels - 1) * waveformHeight;
       }
 
+      // const args = [
+      //   context,
+      //   waveformData.channel(i),
+      //   frameOffset,
+      //   startPixels,
+      //   endPixels,
+      //   waveformTop,
+      //   waveformHeight,
+      //   paddingTop
+      // ]
+
+      // if (this._type === 'playback') {
+      //   this._drawChannel(...args)
+      // } else if (this._type === 'recording') {
+      //   this._drawChannelRecording(...args)
+      // }
+
       this._drawChannel(
         context,
         waveformData.channel(i),
@@ -175,6 +203,48 @@ define(['./utils', 'konva'], function(Utils, Konva) {
       waveformTop += waveformHeight;
     }
   };
+
+  // WaveformShape.prototype._drawChannelRecording = function(context, channel,
+  //   frameOffset, startPixels, endPixels, top, height, paddingTop) {
+
+  //   let amplitudeScale = this._view.getAmplitudeScale();
+
+  //   let x, amplitude, lineX, min, max;
+
+  //   context.strokeStyle = '#000000';
+  //   context.lineWidth = 1;
+  //   context.beginPath();
+
+  //   for (x = startPixels; x < endPixels - 10; x++) {
+  //     amplitude = channel.min_sample(x);
+
+  //     lineX = x - frameOffset;
+  //     min = top + WaveformShape.scaleY(amplitude, height, amplitudeScale) + paddingTop;
+  //     context.lineTo(lineX, min);
+
+  //     amplitude = channel.max_sample(x);
+  //     max = top + WaveformShape.scaleY(amplitude, height, amplitudeScale) + paddingTop;
+  //     context.lineTo(lineX, max);
+  //   }
+
+  //   context.stroke();
+  //   context.closePath();
+
+  //   // if (!this._drawMarks) {
+  //   //   return;
+  //   // }
+
+  //   context.beginPath();
+  //   context.strokeStyle = '#bbbbbb';
+
+  //   for (x = startPixels; x < endPixels + startPixels - 10; x += 60) {
+  //     lineX = x - startPixels - frameOffset;
+  //     context.moveTo(lineX, 0);
+  //     context.lineTo(lineX, 265);
+  //   }
+  //   context.stroke();
+  //   context.closePath();
+  // };
 
   /**
    * Draws a single waveform channel on a canvas context.
@@ -198,6 +268,19 @@ define(['./utils', 'konva'], function(Utils, Konva) {
     var amplitudeScale = this._view.getAmplitudeScale();
 
     var lineX, lineY;
+
+    if (this._type === 'recording') {
+      context.beginPath();
+      context.strokeStyle = '#bbbbbb';
+
+      for (x = startPixels; x < endPixels + startPixels - 10; x += 60) {
+        lineX = x - startPixels - frameOffset;
+        context.moveTo(lineX, 0);
+        context.lineTo(lineX, 265);
+      }
+      context.stroke();
+      context.closePath();
+    }
 
     context.beginPath();
 

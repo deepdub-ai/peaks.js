@@ -310,6 +310,7 @@ define([
           const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY
           var newFrameOffset = Utils.clamp(self._frameOffset + delta, 0, self._pixelLength - self._width);
 
+          self._peaks.emit("zoomview.scroll", self.pixelsToTime(newFrameOffset));
           self._updateWaveform(newFrameOffset);
         }
       },
@@ -474,6 +475,7 @@ define([
         this._frameOffset = 0;
       }
 
+      this._peaks.emit("zoomview.scroll", this.pixelsToTime(this._frameOffset));
       this._updateWaveform(this._frameOffset);
     }
   };
@@ -709,7 +711,8 @@ define([
       view: this,
       pattern: this._peaks.options.zoomviewPattern,
       paddingTop: this._zoomviewPaddingTop,
-      type: this._options.type
+      type: this._options.type,
+      axisGridlineColor: this._options.axisGridlineColor
     });
 
     this._waveformLayer.add(this._waveformShape);

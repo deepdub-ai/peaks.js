@@ -35,6 +35,7 @@ define(['./utils', 'konva'], function(Utils, Konva) {
     this._color = options.color;
     this._paddingTop = options.paddingTop || 0;
     this._type = options.type || 'playback';
+    this._axisGridlineColor = options.axisGridlineColor;
 
     var shapeOptions = {};
 
@@ -200,48 +201,51 @@ define(['./utils', 'konva'], function(Utils, Konva) {
 
   WaveformShape.prototype._drawChannel = function(context, channel,
       frameOffset, startPixels, endPixels, top, height, paddingTop) {
-    var x, amplitude;
+    window._drawChannel.call(this, context, channel,
+      frameOffset, startPixels, endPixels, top, height, paddingTop, WaveformShape)
 
-    var amplitudeScale = this._view.getAmplitudeScale();
+    // var x, amplitude;
 
-    var lineX, lineY;
+    // var amplitudeScale = this._view.getAmplitudeScale();
 
-    if (this._type === 'recording') {
-      context.beginPath();
-      context.strokeStyle = '#bbbbbb';
+    // var lineX, lineY;
 
-      for (x = startPixels; x < endPixels + startPixels - 10; x += 60) {
-        lineX = x - startPixels - frameOffset;
-        context.moveTo(lineX, 0);
-        context.lineTo(lineX, 265);
-      }
-      context.stroke();
-      context.closePath();
-    }
+    // if (this._type === 'recording') {
+    //   context.beginPath();
+    //   context.strokeStyle = this._axisGridlineColor;
 
-    context.beginPath();
+    //   for (x = startPixels; x < endPixels + startPixels - 10; x += 60) {
+    //     lineX = x - startPixels - frameOffset;
+    //     context.moveTo(lineX, 0);
+    //     context.lineTo(lineX, 265);
+    //   }
+    //   context.stroke();
+    //   context.closePath();
+    // }
 
-    for (x = startPixels; x < endPixels; x++) {
-      amplitude = channel.min_sample(x);
+    // context.beginPath();
 
-      lineX = x - frameOffset + 0.5;
-      lineY = top + WaveformShape.scaleY(amplitude, height, amplitudeScale) + 0.5 + paddingTop;
+    // for (x = startPixels; x < endPixels; x++) {
+    //   amplitude = channel.min_sample(x);
 
-      context.lineTo(lineX, lineY);
-    }
+    //   lineX = x - frameOffset + 0.5;
+    //   lineY = top + WaveformShape.scaleY(amplitude, height, amplitudeScale) + 0.5 + paddingTop;
 
-    for (x = endPixels - 1; x >= startPixels; x--) {
-      amplitude = channel.max_sample(x);
+    //   context.lineTo(lineX, lineY);
+    // }
 
-      lineX = x - frameOffset + 0.5;
-      lineY = top + WaveformShape.scaleY(amplitude, height, amplitudeScale) + 0.5 + paddingTop;
+    // for (x = endPixels - 1; x >= startPixels; x--) {
+    //   amplitude = channel.max_sample(x);
 
-      context.lineTo(lineX, lineY);
-    }
+    //   lineX = x - frameOffset + 0.5;
+    //   lineY = top + WaveformShape.scaleY(amplitude, height, amplitudeScale) + 0.5 + paddingTop;
 
-    context.closePath();
+    //   context.lineTo(lineX, lineY);
+    // }
 
-    context.fillShape(this);
+    // context.closePath();
+
+    // context.fillShape(this);
   };
 
   WaveformShape.prototype._waveformShapeHitFunc = function(context) {

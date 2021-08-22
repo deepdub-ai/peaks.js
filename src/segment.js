@@ -144,7 +144,8 @@ define([
       endTime:   this.endTime,
       labelText: this.labelText,
       color:     this.color,
-      editable:  this.editable
+      editable:  this.editable,
+      pattern:   this.pattern
     };
 
     Utils.extend(opts, options);
@@ -156,6 +157,7 @@ define([
     this._labelText = opts.labelText;
     this._color     = opts.color;
     this._editable  = opts.editable;
+    this.pattern    = opts.pattern;
 
     this._setUserData(options);
 

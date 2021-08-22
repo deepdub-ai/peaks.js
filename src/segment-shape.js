@@ -46,6 +46,7 @@ define([
     if (this._showWaveform) {
       this._waveformShape = new WaveformShape({
         color:   segment.color,
+        pattern: segment.pattern,
         view:    view,
         segment: segment,
         paddingTop: this._paddingTop,

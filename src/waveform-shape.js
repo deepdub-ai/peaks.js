@@ -35,6 +35,7 @@ define(['./utils', 'konva'], function(Utils, Konva) {
     this._color = options.color;
     this._paddingTop = options.paddingTop || 0;
     this._type = options.type || 'playback';
+    this._pattern = options.pattern;
 
     var shapeOptions = {};
 
@@ -75,7 +76,9 @@ define(['./utils', 'konva'], function(Utils, Konva) {
   WaveformShape.prototype = Object.create(Konva.Shape.prototype);
 
   WaveformShape.prototype.setWaveformColor = function(color) {
-    if (Utils.isString(color)) {
+    if (this._pattern) {
+      this.fillPatternImage = this._pattern;
+    } else if (Utils.isString(color)) {
       this.fill(color);
     }
     else if (Utils.isLinearGradientColor(color)) {
@@ -221,6 +224,9 @@ define(['./utils', 'konva'], function(Utils, Konva) {
 
     context.beginPath();
 
+    if (this._pattern) {
+      this.fillPatternOffsetX(frameOffset)
+    }
     for (x = startPixels; x < endPixels; x++) {
       amplitude = channel.min_sample(x);
 

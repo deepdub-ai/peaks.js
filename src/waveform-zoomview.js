@@ -311,7 +311,7 @@ define([
           const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY
           var newFrameOffset = Utils.clamp(self._frameOffset + delta, 0, self._pixelLength - self._width);
 
-          self._updateWaveform(newFrameOffset);
+          self._updateWaveform(newFrameOffset, 'wheel');
         }
       },
     });
@@ -741,7 +741,7 @@ define([
    * @param {Number} frameOffset The new frame offset, in pixels.
    */
 
-  WaveformZoomView.prototype._updateWaveform = function (frameOffset) {
+  WaveformZoomView.prototype._updateWaveform = function (frameOffset, cause) {
     var upperLimit;
 
     if (this._pixelLength < this._width) {
@@ -773,7 +773,7 @@ define([
     this._pointsLayer.updatePoints(frameStartTime, frameEndTime);
     this._segmentsLayer.updateSegments(frameStartTime, frameEndTime);
 
-    this._peaks.emit("zoomview.displaying", frameStartTime, frameEndTime);
+    this._peaks.emit("zoomview.displaying", frameStartTime, frameEndTime, cause === 'wheel');
   };
 
   WaveformZoomView.prototype.setWaveformColor = function (color) {

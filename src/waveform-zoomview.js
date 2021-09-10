@@ -50,6 +50,7 @@ define([
     self._originalWaveformData = waveformData;
     self._container = container;
     self._peaks = peaks;
+    self._peaksStore = peaks.options.peaksStore;
 
     // Bind event handlers
     // self._onTimeUpdate = self._onTimeUpdate.bind(self);
@@ -146,6 +147,8 @@ define([
       initMousePosX: 0,
 
       onMouseDown: function (mousePosX, event) {
+        self._peaksStore.setState({ isDragging: true });
+
         this.isAltKeyDownWhenMouseDown = event.evt.altKey;
         this.initialFrameOffset = self._frameOffset;
         this._isShiftKeyDownOnMouseDown = event.evt.shiftKey;
@@ -254,6 +257,7 @@ define([
 
       onMouseUp: function () {
         document.exitPointerLock();
+        self._peaksStore.setState({ isDragging: false });
 
         // Set playhead position only on click release, when not dragging.
         var mouseDownX = Math.floor(this.mouseDownX);
@@ -286,7 +290,7 @@ define([
           return;
         }
 
-        self.timeAtLastWheelEvent = performance.now();
+        self._peaksStore.setState({ timeAtLastWheelEvent: performance.now() });
 
         event.preventDefault();
 
@@ -343,15 +347,16 @@ define([
     const now = performance.now();
 
     const isPlaying = this._peaks.player.isPlaying();
-    const isSeeking = this._peaks.views.getView("overview")._isSeeking;
+    const overview = this._peaks.views.getView('overview');
+    const isSeeking = overview && overview._isSeeking;
+
+    const state = this._peaksStore.getState();
 
     if (
       isSeeking ||
       (!isPlaying && !isSeeking) ||
-      (this._options.detachPlayheadOnDrag &&
-        this._mouseDragHandler.isDragging()) ||
-      (now - this.timeAtLastWheelEvent < 5000 &&
-        this.timeAtLastPlayEvent < this.timeAtLastWheelEvent)
+      (this._options.detachPlayheadOnDrag && state.isDragging) ||
+      (now - state.timeAtLastWheelEvent < 5000 && state.timeAtLastPlayEvent < state.timeAtLastWheelEvent)
     ) {
       this._playheadLayer.updatePlayheadTime(
         this._peaks.player.getCurrentTime()
@@ -370,7 +375,7 @@ define([
   };
 
   WaveformZoomView.prototype._onPlay = function (time) {
-    this.timeAtLastPlayEvent = performance.now();
+    this._peaksStore.setState({ timeAtLastPlayEvent: performance.now() });
     this._playheadLayer.updatePlayheadTime(time);
   };
 

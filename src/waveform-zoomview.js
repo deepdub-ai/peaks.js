@@ -271,7 +271,8 @@ define([
 
         if (
           !self._mouseDragHandler.isDragging() &&
-          !this._isShiftKeyDownOnMouseDown
+          !this._isShiftKeyDownOnMouseDown &&
+          !window.peaksIgnoreClick
         ) {
           self._playheadLayer.updatePlayheadTime(time);
           self._peaks.player.seek(time);

@@ -502,7 +502,7 @@ define([
     );
   }
 
-  WaveformZoomView.prototype.setZoom = _throttle(function (options) {
+  WaveformZoomView.prototype.setZoom = function (options) {
     var scale;
 
     if (isAutoScale(options)) {
@@ -577,7 +577,7 @@ define([
     this._peaks.emit("zoom.update", scale, prevScale);
 
     return true;
-  }, 50);
+  };
 
   WaveformZoomView.prototype.throttledSetZoom = _throttle(function (options) {
     this.setZoom(options);

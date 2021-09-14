@@ -553,14 +553,15 @@ define([
     zoomviewWaveformData[offset+1] = max
   };
 
+  Peaks.prototype.setDataUri = function(dataUri, callback) {
+    this.setSource({
+      dataUri: { arraybuffer: dataUri },
+      skipZoomUpdate: true,
+    }, callback)
+  }
+
   Peaks.prototype.setSource = function(options, callback) {
     var self = this;
-
-    if (this.options.mediaElement && !options.mediaUrl) {
-      // eslint-disable-next-line max-len
-      callback(new Error('peaks.setSource(): options must contain a mediaUrl when using mediaElement'));
-      return;
-    }
 
     function reset() {
       self.removeAllListeners('player.canplay');
@@ -599,7 +600,9 @@ define([
           }
         });
 
-        self.zoom.setZoomLevels(options.zoomLevels);
+        if (!options.skipZoomUpdate) {
+          self.zoom.setZoomLevels(options.zoomLevels);
+        }
 
         callback();
       });
@@ -608,7 +611,7 @@ define([
     self.once('player.canplay', playerCanPlayHandler);
     self.once('player.error', playerErrorHandler);
 
-    if (this.options.mediaElement) {
+    if (options.mediaUrl && this.options.mediaElement) {
       self.options.mediaElement.setAttribute('src', options.mediaUrl);
     }
     else {

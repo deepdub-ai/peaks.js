@@ -255,7 +255,7 @@ define([
         }
       },
 
-      onMouseUp: function () {
+      onMouseUp: function (mousePosX, mousePosY, e) {
         document.exitPointerLock();
         self._peaksStore.setState({ isDragging: false });
 
@@ -265,6 +265,12 @@ define([
         var pixelIndex = self._frameOffset + mouseDownX;
 
         var time = self.pixelsToTime(pixelIndex);
+
+        if (e.button === 2) {
+          self._peaks.emit("zoomview.context_menu", time, {x: mousePosX, y: mousePosY});
+          return
+        }
+
         var duration = self._getDuration();
 
         // Prevent the playhead position from jumping by limiting click

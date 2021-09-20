@@ -84,7 +84,7 @@ define(["konva"], function (Konva) {
   MouseDragHandler.prototype._mouseDown = function (event) {
     if (this.__handleDrag) {
       var marker = getMarkerObject(event.target);
-  
+
       // Avoid interfering with drag/drop of point and segment markers.
       if (marker && marker.attrs.draggable) {
         return;
@@ -179,20 +179,24 @@ define(["konva"], function (Konva) {
 
   MouseDragHandler.prototype._mouseUp = function (event) {
     var clientX = null;
+    var clientY = null;
 
     if (event.type === "touchend") {
       clientX = Math.floor(event.changedTouches[0].clientX);
+      clientY = Math.floor(event.changedTouches[0].clientY);
       if (event.cancelable) {
         event.preventDefault();
       }
     } else {
       clientX = event.clientX;
+      clientY = event.clientY;
     }
 
     if (this._handlers.onMouseUp) {
       var mousePosX = this._getMousePosX(clientX);
+      var mousePosY = this._getMousePosY(clientY);
 
-      this._handlers.onMouseUp(mousePosX);
+      this._handlers.onMouseUp(mousePosX, mousePosY, event);
     }
 
     window.removeEventListener("mousemove", this._mouseMove, false);
@@ -216,6 +220,12 @@ define(["konva"], function (Konva) {
     var containerPos = this._stage.getContainer().getBoundingClientRect();
 
     return clientX - containerPos.left;
+  };
+
+  MouseDragHandler.prototype._getMousePosY = function (clientY) {
+    var containerPos = this._stage.getContainer().getBoundingClientRect();
+
+    return clientY - containerPos.top;
   };
 
   /**

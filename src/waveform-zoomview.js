@@ -871,6 +871,10 @@ define([
   WaveformZoomView.prototype.addToPlayhead = function (indicator) {
     this._playheadLayer.addToPlayhead(indicator);
   };
+
+  WaveformZoomView.prototype.getDataDuration = function () {
+    return this._data.duration;
+  };
   /* WaveformZoomView.prototype.beginZoom = function() {
     // Fade out the time axis and the segments
     // this._axis.axisShape.setAttr('opacity', 0);

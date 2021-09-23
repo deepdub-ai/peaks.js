@@ -553,15 +553,18 @@ define([
     zoomviewWaveformData[offset+1] = max
   };
 
-  Peaks.prototype.setDataUri = function(dataUri, callback) {
-    this.setSource({
-      dataUri: { arraybuffer: dataUri },
-      skipZoomUpdate: true,
-    }, callback)
+  Peaks.prototype.getSource = function() {
+    return Object.assign({
+      dataUri: this.options.dataUri,
+      waveformData: this.options.waveformData,
+      webAudio: this.options.webAudio,
+    }, this._prevSetSourceOptions);
   }
 
   Peaks.prototype.setSource = function(options, callback) {
     var self = this;
+
+    this._prevSetSourceOptions = options;
 
     function reset() {
       self.removeAllListeners('player.canplay');

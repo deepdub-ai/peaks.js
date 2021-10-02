@@ -163,6 +163,9 @@ define([
         var time = self.pixelsToTime(pixelIndex);
         self._peaks.emit("zoomview.mousedown", time, event);
 
+        this.pointerLockTarget = event.evt.target;
+        event.evt.target.setPointerCapture(1);
+
         // TODO use these "hooks" when making further fixes to human interaction
         // with the zoomview
         //
@@ -187,8 +190,6 @@ define([
         //   return;
         // }
 
-        event.target.requestPointerLock();
-
         const slowDownFactor = this.isAltKeyDownWhenMouseDown ? 1 / 10 : 1;
         const zoomChangeFactor =
           this.mouseDownZoomScale /
@@ -204,8 +205,21 @@ define([
           return self.pixelsToTime(pixelIndex);
         };
 
+        const layerX = event.layerX
+        const movementX = event.movementX
+        const rightDistance = this.pointerLockTarget.getBoundingClientRect().width - layerX
+        if (this.isLocked && ((!this.isPanningLeft && movementX < 0) || (this.isPanningLeft && movementX > 0))) {
+          document.exitPointerLock()
+          this.pointerLockTarget.setPointerCapture(1);
+          this.isLocked = false;
+        } else if (!this.isLocked && ((movementX < 0 && layerX <= 100) || (movementX > 0 && rightDistance <= 100))) {
+          this.pointerLockTarget.requestPointerLock().catch(() => { });
+          this.isLocked = true;
+          this.isPanningLeft = layerX <= 100;
+        }
+
         const calculateOffset = () => {
-          let mousePos = this.totalMovementX + this.initMousePosX;
+          const mousePos = this.totalMovementX + this.initMousePosX;
           const width = self._width;
           const padding = 100;
           const absMousePos = mousePos + this.initialFrameOffset;
@@ -256,7 +270,13 @@ define([
       },
 
       onMouseUp: function (mousePosX, mousePosY, e) {
+        if (this.isLocked) {
         document.exitPointerLock();
+          this.isLocked = false;
+        } else {
+          this.pointerLockTarget.releasePointerCapture(1);
+        }
+
         self._peaksStore.setState({ isDragging: false });
 
         // Set playhead position only on click release, when not dragging.

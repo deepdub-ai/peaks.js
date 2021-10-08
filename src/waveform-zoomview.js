@@ -738,6 +738,8 @@ define([
       axisLabelFontSize: this._options.fontSize,
       axisLabelFontStyle: this._options.fontStyle,
       paddingTop: this._zoomviewPaddingTop,
+      axisHideTop: this._options.axisHideTop,
+      axisHideBottom: this._options.axisHideBottom,
     });
 
     this._axis.addToLayer(this._axisLayer);
@@ -868,6 +870,14 @@ define([
 
   WaveformZoomView.prototype.addToPlayhead = function (indicator) {
     this._playheadLayer.addToPlayhead(indicator);
+  };
+
+  WaveformZoomView.prototype.setAxisHideTop = function (value) {
+    this._axis.setAxisHideTop(value);
+  };
+
+  WaveformZoomView.prototype.setAxisHideBottom = function (value) {
+    this._axis.setAxisHideBottom(value);
   };
   /* WaveformZoomView.prototype.beginZoom = function() {
     // Fade out the time axis and the segments

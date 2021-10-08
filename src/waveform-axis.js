@@ -32,6 +32,8 @@ define([
 
     self._axisGridlineColor = options.axisGridlineColor;
     self._axisLabelColor    = options.axisLabelColor;
+    self._axisHideTop       = options.axisHideTop;
+    self._axisHideBottom    = options.axisHideBottom;
 
     self._axisLabelFont = WaveformAxis._buildFontString(
       options.axisLabelFontFamily,
@@ -162,24 +164,40 @@ define([
       }
 
       context.beginPath();
-      context.moveTo(x + 0.5, paddingTop);
-      context.lineTo(x + 0.5, paddingTop + markerHeight);
-      context.moveTo(x + 0.5, height);
-      context.lineTo(x + 0.5, height - markerHeight);
+      if (!this._axisHideTop) {
+        context.moveTo(x + 0.5, paddingTop);
+        context.lineTo(x + 0.5, paddingTop + markerHeight);
+      }
+      if (!this._axisHideBottom) {
+        context.moveTo(x + 0.5, height);
+        context.lineTo(x + 0.5, height - markerHeight);
+      }
       context.stroke();
 
-      // precision = 0, drops the fractional seconds
-      var label      = Utils.formatTime(secs, 0);
-      var labelWidth = context.measureText(label).width;
-      var labelX     = x - labelWidth / 2;
-      var labelY     = height - 1 - markerHeight;
+      if (!this._axisHideBottom) {
+        // precision = 0, drops the fractional seconds
+        var label      = Utils.formatTime(secs, 0);
+        var labelWidth = context.measureText(label).width;
+        var labelX     = x - labelWidth / 2;
+        var labelY     = height - 1 - markerHeight;
 
-      if (labelX >= 0) {
-        context.fillText(label, labelX, labelY);
+        if (labelX >= 0) {
+          context.fillText(label, labelX, labelY);
+        }
       }
 
       secs += axisLabelIntervalSecs;
     }
+  };
+
+  WaveformAxis.prototype.setAxisHideTop = function(value) {
+    this._axisHideTop = value;
+    this._axisShape.draw()
+  };
+
+  WaveformAxis.prototype.setAxisHideBottom = function(value) {
+    this._axisHideBottom = value;
+    this._axisShape.draw()
   };
 
   return WaveformAxis;

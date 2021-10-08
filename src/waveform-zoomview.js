@@ -316,6 +316,10 @@ define([
           return;
         }
 
+        if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+          return;
+        }
+
         self._peaksStore.setState({ timeAtLastWheelEvent: performance.now() });
 
         event.preventDefault();
@@ -338,7 +342,7 @@ define([
             scale: Utils.clamp(targetScale, waveformDataScale, maxScale),
           });
         } else {
-          const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY
+          const delta = event.deltaX;
           var newFrameOffset = Utils.clamp(self._frameOffset + delta, 0, self._pixelLength - self._width);
 
           self._updateWaveform(newFrameOffset, 'wheel');
@@ -760,6 +764,8 @@ define([
       axisLabelFontSize: this._options.fontSize,
       axisLabelFontStyle: this._options.fontStyle,
       paddingTop: this._zoomviewPaddingTop,
+      axisHideTop: this._options.axisHideTop,
+      axisHideBottom: this._options.axisHideBottom,
     });
 
     this._axis.addToLayer(this._axisLayer);
@@ -894,6 +900,14 @@ define([
 
   WaveformZoomView.prototype.getDataDuration = function () {
     return this._data.duration;
+  }
+
+  WaveformZoomView.prototype.setAxisHideTop = function (value) {
+    this._axis.setAxisHideTop(value);
+  };
+
+  WaveformZoomView.prototype.setAxisHideBottom = function (value) {
+    this._axis.setAxisHideBottom(value);
   };
   /* WaveformZoomView.prototype.beginZoom = function() {
     // Fade out the time axis and the segments

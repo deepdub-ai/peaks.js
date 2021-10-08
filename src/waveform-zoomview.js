@@ -290,6 +290,10 @@ define([
           return;
         }
 
+        if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+          return;
+        }
+
         self._peaksStore.setState({ timeAtLastWheelEvent: performance.now() });
 
         event.preventDefault();
@@ -312,7 +316,7 @@ define([
             scale: Utils.clamp(targetScale, waveformDataScale, maxScale),
           });
         } else {
-          const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY
+          const delta = event.deltaX;
           var newFrameOffset = Utils.clamp(self._frameOffset + delta, 0, self._pixelLength - self._width);
 
           self._updateWaveform(newFrameOffset, 'wheel');

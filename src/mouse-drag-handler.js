@@ -84,7 +84,7 @@ define(["konva"], function (Konva) {
   MouseDragHandler.prototype._mouseDown = function (event) {
     if (this.__handleDrag) {
       var marker = getMarkerObject(event.target);
-  
+
       // Avoid interfering with drag/drop of point and segment markers.
       if (marker && marker.attrs.draggable) {
         return;
@@ -119,19 +119,6 @@ define(["konva"], function (Konva) {
    * @param {MouseEvent} event
    */
   MouseDragHandler.prototype._mouseWheel = function (event) {
-    if (this._handlers.onMouseWheel) {
-      this._handlers.onMouseWheel(event);
-    }
-  };
-
-  /**
-   * Mouse wheel event handler.
-   *
-   * @param {MouseEvent} event
-   */
-  MouseDragHandler.prototype._mouseWheel = function (event) {
-    event.preventDefault();
-
     if (this._handlers.onMouseWheel) {
       this._handlers.onMouseWheel(event);
     }

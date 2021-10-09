@@ -72,6 +72,16 @@ define(function() {
       return result;
     },
 
+    formatTimecode: function(time, fps) {
+      const adjustedTime = (time * (24000 / 1001)) / fps
+      const hour = String(Math.floor(adjustedTime / (60 * 60))).padStart(2, '0');
+      const mins = String(Math.floor(adjustedTime / 60) % 60).padStart(2, '0');
+      const secs = String(Math.floor(adjustedTime % 60)).padStart(2, '0');
+      const frame = String(Math.floor((adjustedTime % 1) * fps)).padStart(2, '0');
+
+      return `${hour}:${mins}:${secs}:${frame}`;
+    },
+
     /**
      * Rounds the given value up to the nearest given multiple.
      *

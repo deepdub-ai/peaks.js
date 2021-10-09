@@ -639,6 +639,10 @@ define([
     window.removeEventListener('resize', this._onResize);
   };
 
+  Peaks.prototype.setFps = function(fps) {
+    this.options.fps = fps;
+  };
+
   /**
    * Cleans up a Peaks instance after use.
    */

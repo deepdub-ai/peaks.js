@@ -404,7 +404,7 @@ define([
   };
 
   WaveformOverview.prototype.formatTime = function(time) {
-    return Utils.formatTime(time, this._timeLabelPrecision);
+    return Utils.formatTimecode(time, this._peaks.options.fps || 24);
   };
 
   WaveformOverview.prototype.enableAutoScroll = function() {

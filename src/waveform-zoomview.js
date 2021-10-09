@@ -395,7 +395,7 @@ define([
     if (!self._zoomLevelAuto) {
       self._width = width;
       self._stage.width(width);
-      self._updateWaveform(self._frameOffset);
+      self._updateWaveform(self._frameOffset, 'resize');
     } else {
       if (self._resizeTimeoutId) {
         clearTimeout(self._resizeTimeoutId);
@@ -412,7 +412,7 @@ define([
           self._data = self._originalWaveformData.resample({ width: self._width, scale: 1 });
           self._stage.width(width);
 
-          self._updateWaveform(self._frameOffset);
+          self._updateWaveform(self._frameOffset, 'resize');
         }, 500);
       }
     }
@@ -443,7 +443,7 @@ define([
       increment = direction * this.timeToPixels(this._options.nudgeIncrement);
     }
 
-    this._updateWaveform(this._frameOffset + increment);
+    this._updateWaveform(this._frameOffset + increment, 'keyboard-scroll');
   };
 
   WaveformZoomView.prototype.setWaveformData = function (waveformData) {
@@ -484,7 +484,7 @@ define([
         this._frameOffset = 0;
       }
 
-      this._updateWaveform(this._frameOffset);
+      this._updateWaveform(this._frameOffset, 'auto-scroll');
     }
   };
 
@@ -567,7 +567,7 @@ define([
 
     this._frameOffset = apexPixel - playheadOffsetPixels;
 
-    this._updateWaveform(this._frameOffset);
+    this._updateWaveform(this._frameOffset, 'zoom');
 
     this._playheadLayer.zoomLevelChanged();
 
@@ -784,7 +784,7 @@ define([
     this._pointsLayer.updatePoints(frameStartTime, frameEndTime);
     this._segmentsLayer.updateSegments(frameStartTime, frameEndTime);
 
-    this._peaks.emit("zoomview.displaying", frameStartTime, frameEndTime, cause === 'wheel');
+    this._peaks.emit("zoomview.displaying", frameStartTime, frameEndTime, cause);
   };
 
   WaveformZoomView.prototype.setWaveformColor = function (color) {

@@ -116,6 +116,8 @@ define([
     self._pointsLayer = new PointsLayer(peaks, self, true, self._zoomviewPaddingTop);
     self._pointsLayer.addToStage(self._stage);
 
+    self._pointingDevice = Utils.detectPointingDevice();
+
     if (!self._options.hideAxis) {
       self._createAxisLabels();
     }
@@ -316,7 +318,11 @@ define([
           return;
         }
 
-        if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+        if (self._pointingDevice === 'trackpad' && Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+          return;
+        }
+
+        if (self._pointingDevice === 'mouse' && event.shiftKey) {
           return;
         }
 
@@ -342,7 +348,10 @@ define([
             scale: Utils.clamp(targetScale, waveformDataScale, maxScale),
           });
         } else {
-          const delta = event.deltaX;
+          const delta = self._pointingDevice === 'mouse'
+            ? Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY
+            : event.deltaX;
+
           var newFrameOffset = Utils.clamp(self._frameOffset + delta, 0, self._pixelLength - self._width);
 
           self._updateWaveform(newFrameOffset, 'wheel');

@@ -288,6 +288,28 @@ define(function() {
 
     objectHasProperty: function(object, field) {
       return Object.prototype.hasOwnProperty.call(object, field);
+    },
+
+    detectPointingDevice: function() {
+      const scrollEl = document.createElement('div');
+      const childEl = document.createElement('div');
+
+      scrollEl.style.width = '1px';
+      scrollEl.style.height = '1px';
+      scrollEl.style.overflow = 'auto';
+      scrollEl.style.position = 'fixed';
+      scrollEl.style.visibility = 'hidden';
+      childEl.style.height = '2px';
+
+      scrollEl.appendChild(childEl);
+      document.body.appendChild(scrollEl);
+
+      const scrollbarWidth = scrollEl.offsetWidth - scrollEl.clientWidth;
+      const controlDevice = scrollbarWidth ? 'mouse' : 'trackpad';
+
+      scrollEl.remove();
+
+      return controlDevice;
     }
   };
 });

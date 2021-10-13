@@ -391,15 +391,21 @@ define([
 
     const state = this._peaksStore.getState();
 
+    const currentTime = this._peaks.player.getCurrentTime();
+    if (currentTime === this._prevCurrentTime) {
+      window.requestAnimationFrame(this._updateTime);
+      return;
+    }
+
+    this._prevCurrentTime = currentTime;
+
     if (
       isSeeking ||
       (!isPlaying && !isSeeking) ||
       (this._options.detachPlayheadOnDrag && state.isDragging) ||
       (now - state.timeAtLastWheelEvent < 5000 && state.timeAtLastPlayEvent < state.timeAtLastWheelEvent)
     ) {
-      this._playheadLayer.updatePlayheadTime(
-        this._peaks.player.getCurrentTime()
-      );
+      this._playheadLayer.updatePlayheadTime(currentTime);
 
       if (!this._cancelRequestAnimationFrame) {
         window.requestAnimationFrame(this._updateTime);
@@ -407,7 +413,7 @@ define([
       return;
     }
 
-    this._syncPlayhead(this._peaks.player.getCurrentTime());
+    this._syncPlayhead(currentTime);
     if (!this._cancelRequestAnimationFrame) {
       window.requestAnimationFrame(this._updateTime);
     }

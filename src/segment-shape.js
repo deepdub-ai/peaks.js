@@ -43,12 +43,15 @@ define([
     this._color         = segment.color;
     this._showWaveform  = !segment.hideWaveform;
 
+    this.getWaveformData = this.getWaveformData.bind(this);
+
     if (this._showWaveform) {
       this._waveformShape = new WaveformShape({
         color:   segment.color,
         pattern: segment.pattern,
         view:    view,
         segment: segment,
+        getWaveformData: segment.waveformId ? this.getWaveformData : undefined,
         paddingTop: this._paddingTop,
       });
     }
@@ -278,6 +281,17 @@ define([
     var startMarker = segmentMarker.isStartMarker();
 
     this._peaks.emit('segments.dragend', this._segment, startMarker);
+  };
+
+  SegmentShape.prototype.getWaveformData = function() {
+    const view = this._view.getName()
+    const waveform = this._peaks.options.peaksStore.getState().getWaveformById(view, this._segment.waveformId)
+
+    if (!waveform) {
+      return null
+    }
+
+    return waveform.data;
   };
 
   SegmentShape.prototype.fitToView = function() {

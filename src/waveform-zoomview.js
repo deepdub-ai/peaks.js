@@ -62,6 +62,7 @@ define([
     self._onKeyboardShiftLeft = self._onKeyboardShiftLeft.bind(self);
     self._onKeyboardShiftRight = self._onKeyboardShiftRight.bind(self);
     self._updateTime = self._updateTime.bind(self);
+    self.getWaveformData = self.getWaveformData.bind(self);
 
     // Register event handlers
     // self._peaks.on('player.timeupdate', self._onTimeUpdate);
@@ -273,7 +274,7 @@ define([
 
       onMouseUp: function (mousePosX, mousePosY, e) {
         if (this.isLocked) {
-        document.exitPointerLock();
+          document.exitPointerLock();
           this.isLocked = false;
         } else {
           this.pointerLockTarget.releasePointerCapture(1);
@@ -631,7 +632,12 @@ define([
   WaveformZoomView.prototype._resampleData = function (options) {
     this._data = this._originalWaveformData.resample(options);
     this._scale = this._data.scale;
-    this._pixelLength = this._data.length;
+    if (this._peaks.options.silence) {
+      this._pixelLength = this._data.pixels_per_second * this._peaks.options.silence.duration;
+    } else {
+      this._pixelLength = this._data.length;
+    }
+    this._peaks.options.peaksStore.getState().resampleWaveforms('zoomview', options)
   };
 
   WaveformZoomView.prototype.getStartTime = function () {

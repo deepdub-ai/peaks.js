@@ -117,9 +117,48 @@ define([
       if (options.webAudio.audioBuffer) {
         return this._buildWaveformDataFromAudioBuffer(options, callback);
       }
-      else {
+      else if (!options.initWithoutWaveform) {
         return this._buildWaveformDataUsingWebAudio(options, callback);
       }
+    }
+    else if (options.silence) {
+      callback(null, options.silence.waveform)
+      // callback(null, {
+      //   bits: 8,
+      //   channels: 1,
+      //   duration: 10,
+      //   length: 12000,
+      //   pixels_per_second: 1200,
+      //   sample_rate: 48000,
+      //   scale: 40,
+      //   seconds_per_pixel: 0.0008333333333333334,
+      //   _adapter: {
+      //     _data: {
+      //       buffer: {
+      //         byteLength: 24020
+      //       },
+      //       byteLength: 24020
+      //     }
+      //   }
+      // })
+      // Promise.all(options.offsettedDats.map((offsettedDat) => {
+      //   return new Promise(resolve => {
+      //     this._getRemoteWaveformData({ dataUri: { arraybuffer: offsettedDat.dat }}, (err, waveformData) => {
+      //       resolve(waveformData)
+      //     });
+      //   })
+      // })).then(waveformDatas => {
+      //   const waveformData = waveformDatas.slice(1).reduce((prev, curr) => {
+      //     return prev.concat(curr)
+      //   }, waveformDatas[0])
+      //   window.waveformLengths = waveformDatas.map(({length}) => length)
+      //   console.log(waveformDatas)
+      //   console.log(waveformData)
+      //   callback(null, waveformData)
+      // })
+    }
+    else if (options.initWithoutWaveform) {
+      callback(null, null)
     }
     else {
       // eslint-disable-next-line max-len

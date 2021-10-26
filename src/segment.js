@@ -164,6 +164,12 @@ define([
     this._peaks.emit('segments.update', this);
   };
 
+  Segment.prototype._updateId = function(id) {
+    const prevId = this._id;
+    this._id = id;
+    this._peaks.emit('segments.update_id', { id: prevId, newId: id });
+  };
+
   /**
    * Returns <code>true</code> if the segment overlaps a given time region.
    *

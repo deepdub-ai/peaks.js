@@ -246,6 +246,15 @@ define([
     return indexes;
   };
 
+  WaveformSegments.prototype.updateId = function(id, newId) {
+    const segment = this.getSegment(id);
+
+    segment._updateId(newId);
+
+    delete this._segmentsById[id];
+    this._segmentsById[newId] = segment;
+  };
+
   /**
    * Removes the segments at the given array indexes.
    *
@@ -321,7 +330,7 @@ define([
 
   /**
    * Removes any segments with the given id.
-   * 
+   *
    * This method first hides it, the defers that segment's removal.
    *
    * @param {String} id
@@ -329,7 +338,7 @@ define([
 
   WaveformSegments.prototype.deferRemoveById = function(segmentId) {
     this._peaks.emit('segments.hide', [this._segmentsById[segmentId]])
-    
+
     setTimeout(() => {
       this._removeSegments(function(segment) {
         return segment.id === segmentId;

@@ -232,7 +232,9 @@ define([
 
       self._resizeTimeoutId = setTimeout(function() {
         self._width = self._container.clientWidth;
-        self._data = self._originalWaveformData.resample({ width: self._width });
+        const options = { width: self._width }
+        self._data = self._originalWaveformData.resample(options);
+        this._peaks.options.peaksStore.getState().resampleWaveforms('overview', options)
         self._stage.setWidth(self._width);
 
         self._updateWaveform();
@@ -261,6 +263,10 @@ define([
    */
 
   WaveformOverview.prototype.timeToPixels = function(time) {
+    if (this._peaks.options.silence) {
+      return Math.floor(time / this._peaks.options.silence.duration * this.getWidth())
+    }
+
     return Math.floor(time * this._data.sample_rate / this._data.scale);
   };
 
@@ -272,6 +278,10 @@ define([
    */
 
   WaveformOverview.prototype.pixelsToTime = function(pixels) {
+    if (this._peaks.options.silence) {
+      return pixels / this.getWidth() * this._peaks.options.silence.duration;
+    }
+
     return pixels * this._data.scale / this._data.sample_rate;
   };
 
@@ -429,7 +439,9 @@ define([
       this._stage.setWidth(this._width);
 
       try {
-        this._data = this._originalWaveformData.resample({ width: this._width });
+        const options = { width: this._width }
+        this._peaks.options.peaksStore.getState().resampleWaveforms('overview', options)
+        this._data = this._originalWaveformData.resample(options);
         updateWaveform = true;
       }
       catch (error) {

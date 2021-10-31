@@ -148,10 +148,9 @@ define([
       isAltKeyDownWhenMouseDown: false,
       mouseDownZoom: 0,
       initMousePosX: 0,
+      preventContextMenu: true,
 
-      onMouseDown: function (mousePosX, event) {
-        self._peaksStore.setState({ isDragging: true });
-
+      onMouseDown: function (mousePosX, mousePosY, event) {
         this.isAltKeyDownWhenMouseDown = event.evt.altKey;
         this.initialFrameOffset = self._frameOffset;
         this._isShiftKeyDownOnMouseDown = event.evt.shiftKey;
@@ -164,10 +163,23 @@ define([
         this.initPixelIndex = pixelIndex;
         this.initMousePosX = mousePosX;
         var time = self.pixelsToTime(pixelIndex);
+
+        if (event.evt.button === 2) {
+          event.evt.preventDefault()
+          self._peaks.emit("zoomview.context_menu", time, {x: mousePosX, y: mousePosY});
+          return false
+        }
+
+        self._peaksStore.setState({ isDragging: true });
+
         self._peaks.emit("zoomview.mousedown", time, event);
 
         this.pointerLockTarget = event.evt.target;
-        event.evt.target.setPointerCapture(1);
+        // TODO[epic="generation"] do we really need setPointerCapture?
+        //
+        // this.pointerLockTarget = event.evt.target.closest('[data-main-track]');
+        // this.pointerLockTarget.setPointerCapture(1);
+
 
         // TODO use these "hooks" when making further fixes to human interaction
         // with the zoomview
@@ -176,6 +188,10 @@ define([
       },
 
       onMouseMove: function (eventType, mousePosX, event) {
+        if (event.button === 2) {
+          return
+        }
+
         // FIXME this might cause an issue?
         // These lines were in the base, while the uncommented lines appear in the
         // fork branch.
@@ -213,7 +229,7 @@ define([
         const rightDistance = this.pointerLockTarget.getBoundingClientRect().width - layerX
         if (this.isLocked && ((!this.isPanningLeft && movementX < 0) || (this.isPanningLeft && movementX > 0))) {
           document.exitPointerLock()
-          this.pointerLockTarget.setPointerCapture(1);
+          // this.pointerLockTarget.setPointerCapture(1);
           this.isLocked = false;
         } else if (!this.isLocked && ((movementX < 0 && layerX <= 100) || (movementX > 0 && rightDistance <= 100))) {
           this.pointerLockTarget.requestPointerLock().catch(() => { });
@@ -268,11 +284,16 @@ define([
         this.newFrameOffset = newFrameOffset;
 
         if (newFrameOffset !== this.initialFrameOffset) {
-          self._updateWaveform(newFrameOffset);
+          self._updateWaveform(newFrameOffset, this.isLocked ? 'drag-scroll' : undefined);
+          // self._updateWaveform(newFrameOffset)
         }
       },
 
-      onMouseUp: function (mousePosX, mousePosY, e) {
+      onMouseUp: function (_, __, event) {
+        if (event.button === 2) {
+          return
+        }
+
         if (this.isLocked) {
           document.exitPointerLock();
           this.isLocked = false;
@@ -288,11 +309,6 @@ define([
         var pixelIndex = self._frameOffset + mouseDownX;
 
         var time = self.pixelsToTime(pixelIndex);
-
-        if (e.button === 2) {
-          self._peaks.emit("zoomview.context_menu", time, {x: mousePosX, y: mousePosY});
-          return
-        }
 
         var duration = self._getDuration();
 
@@ -930,6 +946,11 @@ define([
   WaveformZoomView.prototype.setAxisHideBottom = function (value) {
     this._axis.setAxisHideBottom(value);
   };
+
+  WaveformZoomView.prototype.getContainer = function () {
+    return this._container;
+  };
+
   /* WaveformZoomView.prototype.beginZoom = function() {
     // Fade out the time axis and the segments
     // this._axis.axisShape.setAttr('opacity', 0);

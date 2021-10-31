@@ -99,8 +99,9 @@ define(["konva"], function (Konva) {
 
     if (this._handlers.onMouseDown) {
       var mouseDownPosX = this._getMousePosX(this._mouseDownClientX);
+      var mouseDownPosY = this._getMousePosY(event.evt.clientY);
 
-      this._handlers.onMouseDown(mouseDownPosX, event);
+      this._handlers.onMouseDown(mouseDownPosX, mouseDownPosY, event);
     }
 
     // Use the window mousemove and mouseup handlers instead of the

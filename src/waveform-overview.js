@@ -166,7 +166,7 @@ define([
     }
 
     self._mouseDragHandler = new MouseDragHandler(self._stage, {
-      onMouseDown: function(mousePosX, event) {
+      onMouseDown: function(mousePosX, _, event) {
         self._isSeeking = true;
         self._isCtrlSeeking = event.evt.ctrlKey;
         self._onMouseDownAndMouseMove(mousePosX);

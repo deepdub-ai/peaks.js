@@ -168,7 +168,7 @@ define(['./utils', 'konva'], function(Utils, Konva) {
         if (endPixels > waveformData.length) {
           endPixels = waveformData.length;
         }
-      } else if (this._segment.type !== 'REGION_SELECTION') {
+      } else if (this._segment.type !== 'SELECTION_REGION') {
         // if (this._segment) {
           const segmentStartPixel = this._view.timeToPixels(this._segment.startTime);
           if (endPixels > segmentStartPixel + waveformData.length) {

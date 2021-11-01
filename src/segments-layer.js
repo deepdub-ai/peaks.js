@@ -99,6 +99,10 @@ define([
   };
 
   SegmentsLayer.prototype._onSegmentsUpdateId = function({ id, newId }) {
+    if (!this._segmentShapes[id]) {
+      return
+    }
+
     this._segmentShapes[newId] = this._segmentShapes[id];
     delete this._segmentShapes[id];
   };

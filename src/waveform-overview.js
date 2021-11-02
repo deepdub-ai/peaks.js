@@ -231,6 +231,10 @@ define([
       self._stage.setWidth(self._width);
 
       self._resizeTimeoutId = setTimeout(function() {
+        if (self._originalWaveformData.duration === 0) {
+          return
+        }
+
         self._width = self._container.clientWidth;
         const options = { width: self._width }
         self._data = self._originalWaveformData.resample(options);

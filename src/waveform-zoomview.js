@@ -400,6 +400,10 @@ define([
   // };
 
   WaveformZoomView.prototype._updateTime = function () {
+    if (this._abortUpdateTime) {
+      return;
+    }
+
     const now = performance.now();
 
     const isPlaying = this._peaks.player.isPlaying();
@@ -424,16 +428,12 @@ define([
     ) {
       this._playheadLayer.updatePlayheadTime(currentTime);
 
-      if (!this._cancelRequestAnimationFrame) {
-        window.requestAnimationFrame(this._updateTime);
-      }
+      window.requestAnimationFrame(this._updateTime);
       return;
     }
 
     this._syncPlayhead(currentTime);
-    if (!this._cancelRequestAnimationFrame) {
-      window.requestAnimationFrame(this._updateTime);
-    }
+    window.requestAnimationFrame(this._updateTime);
   };
 
   WaveformZoomView.prototype._onPlay = function (time) {
@@ -466,6 +466,10 @@ define([
         self._stage.width(width);
 
         self._resizeTimeoutId = setTimeout(function () {
+          if (self._originalWaveformData.duration === 0) {
+            return
+          }
+
           self._width = width;
           self._data = self._originalWaveformData.resample({ width: self._width, scale: 1 });
           self._stage.width(width);
@@ -994,7 +998,7 @@ define([
     this._peaks.off("keyboard.shift_left", this._onKeyboardShiftLeft);
     this._peaks.off("keyboard.shift_right", this._onKeyboardShiftRight);
 
-    this._cancelRequestAnimationFrame = true;
+    this._abortUpdateTime = true;
 
     this._playheadLayer.destroy();
     this._segmentsLayer.destroy();

@@ -107,6 +107,13 @@ define([
       height: self._height,
     });
 
+    // Konva's _wheel handler is called on wheel events,
+    // and its execution time is 4-6ms.
+    // We don't see any value in what it's doing, so
+    // we'll just disable it.
+    //
+    Konva.Stage.prototype._wheel = function () {}
+
     self._waveformLayer = new Konva.FastLayer();
 
     self._createWaveform();
@@ -400,7 +407,7 @@ define([
   // };
 
   WaveformZoomView.prototype._updateTime = function () {
-    if (this._abortUpdateTime) {
+    if (this._isDestroyed) {
       return;
     }
 
@@ -411,6 +418,22 @@ define([
     const isSeeking = overview && overview._isSeeking;
 
     const state = this._peaksStore.getState();
+
+    // Stop this loop if track isn't visible, restart it when it
+    // becomes visible again.
+    //
+    if (!state.tracksVisibility[this._peaks.options.trackId]) {
+      const unsubscribe = this._peaksStore.subscribe(
+        (isVisible) => {
+          if (isVisible) {
+            window.requestAnimationFrame(this._updateTime);
+            unsubscribe()
+          }
+        },
+        (state) => state.tracksVisibility[this._peaks.options.trackId]
+      );
+      return;
+    }
 
     const currentTime = this._peaks.player.getCurrentTime();
     if (currentTime === this._prevCurrentTime) {
@@ -669,6 +692,8 @@ define([
   };
 
   WaveformZoomView.prototype.setStartTime = function (time) {
+    this._startTime = time;
+
     if (time < 0) {
       time = 0;
     }
@@ -678,6 +703,18 @@ define([
     }
 
     this._updateWaveform(this.timeToPixels(time));
+  };
+
+  WaveformZoomView.prototype.repaint = function () {
+    this.setStartTime(this._startTime);
+  };
+
+  WaveformZoomView.prototype.show = function () {
+    this._stage.show();
+  };
+
+  WaveformZoomView.prototype.hide = function () {
+    this._stage.hide();
   };
 
   /**
@@ -998,7 +1035,7 @@ define([
     this._peaks.off("keyboard.shift_left", this._onKeyboardShiftLeft);
     this._peaks.off("keyboard.shift_right", this._onKeyboardShiftRight);
 
-    this._abortUpdateTime = true;
+    this._isDestroyed = true;
 
     this._playheadLayer.destroy();
     this._segmentsLayer.destroy();

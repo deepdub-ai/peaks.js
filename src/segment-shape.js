@@ -283,15 +283,20 @@ define([
     this._peaks.emit('segments.dragend', this._segment, startMarker);
   };
 
-  SegmentShape.prototype.getWaveformData = function() {
+  SegmentShape.prototype.getWaveformData = function(options) {
     const view = this._view.getName()
-    const waveform = this._peaks.options.peaksStore.getState().getWaveformById(view, this._segment.waveformId)
 
-    if (!waveform) {
-      return null
+    if (options && options.async) {
+      return this._peaks.options.peaksStore.getState().awaitWaveformById(view, this._segment.waveformId)
+    } else {
+      const waveform = this._peaks.options.peaksStore.getState().getWaveformById(view, this._segment.waveformId)
+
+      if (!waveform) {
+        return null
+      }
+
+      return waveform.data;
     }
-
-    return waveform.data;
   };
 
   SegmentShape.prototype.fitToView = function() {

@@ -37,6 +37,18 @@ define(['./utils', 'konva'], function(Utils, Konva) {
     this._type = options.type || 'playback';
     this._pattern = options.pattern;
 
+    this.viewName = options.view.getName()
+
+    // Used to ignore calls to "stale" calls to
+    // `_sceneFunc`.
+    // Calls will become "stale" when `_sceneFunc`
+    // was called more than once without calling
+    // `_drawWaveform`. This will happen when `sceneFunc`
+    // was called but the Waveform Data was not yet available
+    // causing `sceneFunc` to await it.
+    //
+    this._sceneFuncCallId = 0;
+
     var shapeOptions = {};
 
     if (options.pattern) {
@@ -118,22 +130,40 @@ define(['./utils', 'konva'], function(Utils, Konva) {
     var frameOffset = this._view.getFrameOffset();
     var width = this._view.getWidth();
     var height = this._view.getHeight() - paddingTop;
-    const waveformData = this._getWaveformData();
+    let waveformData = this._getWaveformData();
+    this._sceneFuncCallId++;
 
-    if (!waveformData) {
-      return;
+    // peaks can't handle `async`, hence this.
+    //
+    const drawWaveform = (waveformData) => {
+      this._drawWaveform(
+        context,
+        waveformData,
+        Math.round(frameOffset),
+        Math.round(this._segment ? this._view.timeToPixels(this._segment.startTime) : frameOffset),
+        Math.floor(this._segment ? this._view.timeToPixels(this._segment.endTime)   : frameOffset + width),
+        width,
+        height,
+        paddingTop
+      );
     }
 
-    this._drawWaveform(
-      context,
-      waveformData,
-      Math.round(frameOffset),
-      Math.round(this._segment ? this._view.timeToPixels(this._segment.startTime) : frameOffset),
-      Math.floor(this._segment ? this._view.timeToPixels(this._segment.endTime)   : frameOffset + width),
-      width,
-      height,
-      paddingTop
-    );
+    if (!waveformData) {
+      if (this.viewName === 'overview') {
+        return;
+      }
+
+      const sceneFuncCallId = this._sceneFuncCallId;
+
+      this._getWaveformData({ async: true }).then(waveformData => {
+        if (sceneFuncCallId !== this._sceneFuncCallId) {
+          return;
+        }
+        drawWaveform(waveformData)
+      })
+    } else {
+      drawWaveform(waveformData)
+    }
   };
 
   /**

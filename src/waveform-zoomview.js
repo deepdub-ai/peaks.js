@@ -52,6 +52,8 @@ define([
     self._peaks = peaks;
     self._peaksStore = peaks.options.peaksStore;
 
+    self._resampleDataCallId = 0;
+
     // Bind event handlers
     // self._onTimeUpdate = self._onTimeUpdate.bind(self);
     self._onPlay = self._onPlay.bind(self);
@@ -646,24 +648,36 @@ define([
 
     var prevScale = this._scale;
 
-    this._resampleData({ scale: scale });
+    const updateWaveformId = this._updateWaveformId;
 
-    var apexPixel = this.timeToPixels(apexTime);
+    const render = () => {
+      if (updateWaveformId === this._updateWaveformId) {
+        var apexPixel = this.timeToPixels(apexTime);
 
-    this._frameOffset = apexPixel - playheadOffsetPixels;
+        this._frameOffset = apexPixel - playheadOffsetPixels;
+      }
 
-    this._updateWaveform(this._frameOffset, 'zoom');
+      this._updateWaveform(this._frameOffset, 'zoom');
 
-    this._playheadLayer.zoomLevelChanged();
+      this._playheadLayer.zoomLevelChanged();
 
-    // Update the playhead position after zooming.
-    this._playheadLayer.updatePlayheadTime(currentTime);
+      // Update the playhead position after zooming.
+      this._playheadLayer.updatePlayheadTime(currentTime);
 
-    // var adapter = this.createZoomAdapter(currentScale, previousScale);
+      // var adapter = this.createZoomAdapter(currentScale, previousScale);
 
-    // adapter.start(relativePosition);
+      // adapter.start(relativePosition);
 
-    this._peaks.emit("zoom.update", scale, prevScale);
+      this._peaks.emit("zoom.update", scale, prevScale);
+
+      // if (options.startTime && updateWaveformId === this._updateWaveformId) {
+      //   this.setStartTime(options.startTime);
+      // }
+    }
+
+    this._resampleData({ scale: scale }, render);
+
+    render()
 
     return true;
   };
@@ -672,7 +686,18 @@ define([
     this.setZoom(options);
   }, 50);
 
-  WaveformZoomView.prototype._resampleData = function (options) {
+  WaveformZoomView.prototype._resampleData = function (options, callback) {
+    // If resampleData is called more than once "quickly" (meaning, the first
+    // invocation's `resampleWaveforms` hasn't finised running), we don't want
+    // to call `callback`. In other words, we're "aborting" the process.
+    // We keep a reference to the value of `_resampleDataCallId` at time of
+    // invocation, which we'll later compare to the its current value. If
+    // both values are the same, we know that there were no invocation
+    // following this, current one.
+    //
+    const resampleDataCallId = ++this._resampleDataCallId
+    // In silent waveforms mode, this._originalWaveformData is of length 0.
+    //
     this._data = this._originalWaveformData.resample(options);
     this._scale = this._data.scale;
     if (this._peaks.options.silence) {
@@ -680,7 +705,18 @@ define([
     } else {
       this._pixelLength = this._data.length;
     }
-    this._peaks.options.peaksStore.getState().resampleWaveforms('zoomview', options)
+
+    // This is where the _real_ resampling happens. Due to its async nature, once resolved
+    // we call the callback function.
+    // Note that we only call it if this is last invocation of `_resampleData`.
+    //
+    this._peaks.options.peaksStore.getState().resampleWaveforms('zoomview', options).then(() => {
+      if (this._resampleDataCallId !== resampleDataCallId) {
+        return
+      }
+
+      callback()
+    })
   };
 
   WaveformZoomView.prototype.getStartTime = function () {
@@ -692,8 +728,6 @@ define([
   };
 
   WaveformZoomView.prototype.setStartTime = function (time) {
-    this._startTime = time;
-
     if (time < 0) {
       time = 0;
     }
@@ -706,7 +740,7 @@ define([
   };
 
   WaveformZoomView.prototype.repaint = function () {
-    this.setStartTime(this._startTime);
+    this._updateWaveform(this._frameOffset, 'repaint');
   };
 
   WaveformZoomView.prototype.show = function () {
@@ -856,7 +890,17 @@ define([
    * @param {Number} frameOffset The new frame offset, in pixels.
    */
 
+  // _updateWaveformId is a unique ID for each dispatch of _updateWaveform.
+  // We will later use this to determine if the waveform has already been
+  // updated, in the case where multiple events are triggered at the same time.
+  // When setZoom is called, an async resampling process starts, when it finishes
+  // it updates the `_frameOffset`.
+  // By the time it finishes, the user may have already scrolled the waveform.
+  // In that case, we _do not_ want to update `_frameOffset`.
+  //
+  WaveformZoomView.prototype._updateWaveformId = 0;
   WaveformZoomView.prototype._updateWaveform = function (frameOffset, cause) {
+    this._updateWaveformId++
     var upperLimit;
 
     if (this._pixelLength < this._width) {

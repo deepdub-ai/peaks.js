@@ -154,9 +154,15 @@ define(['./utils', 'konva'], function(Utils, Konva) {
       }
 
       const sceneFuncCallId = this._sceneFuncCallId;
+      const frameOffset = this._view.getFrameOffset();
+
+      const originalWaveformData = window.peaksStore.getState().getOriginalWaveformById('zoomview', this._segment.waveformId)
+      if (originalWaveformData) {
+        drawWaveform(originalWaveformData);
+      }
 
       this._getWaveformData({ async: true }).then(waveformData => {
-        if (sceneFuncCallId !== this._sceneFuncCallId) {
+        if (!waveformData || sceneFuncCallId !== this._sceneFuncCallId || frameOffset !== this._view.getFrameOffset()) {
           return;
         }
         drawWaveform(waveformData)

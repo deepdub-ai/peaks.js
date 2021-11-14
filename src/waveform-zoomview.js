@@ -677,7 +677,7 @@ define([
 
     this._resampleData({ scale: scale }, render);
 
-    render()
+    // render()
 
     return true;
   };

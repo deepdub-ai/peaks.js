@@ -150,6 +150,8 @@ define([
 
     self._syncPlayhead(time);
 
+    self.isChromeCanary = localStorage.getItem('isChromeCanary') === 'true';
+
     self._mouseDragHandler = new MouseDragHandler(self._stage, {
       totalMovementX: 0,
       initPixelIndex: 0,
@@ -378,7 +380,11 @@ define([
             ? Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY
             : event.deltaX;
 
-          var newFrameOffset = Utils.clamp(self._frameOffset + delta, 0, self._pixelLength - self._width);
+            // This handles a weird behavior in Chrome Canary where deltaX/Y values are twice as big
+            // than in plain Chrome.
+            //
+            const MOUSE_DELTA_MULTIPLIER = self.isChromeCanary ? 0.5 : 1
+            var newFrameOffset = Utils.clamp(self._frameOffset + delta * MOUSE_DELTA_MULTIPLIER, 0, self._pixelLength - self._width);
 
           self._updateWaveform(newFrameOffset, 'wheel');
         }

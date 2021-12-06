@@ -55,12 +55,12 @@ define([
     this._group = new Konva.Group({
       draggable:     this._draggable,
       dragBoundFunc: this._dragBoundFunc,
-      y:             self._peaksStore ? self._peaksStore.getState().segmentDetailsHeight : 0,
+      y:             this._peaksStore ? this._peaksStore.getState().segmentDetailsHeight : 0,
       listening:     false,
     });
 
-    if (self._peaksStore) {
-      self._unsubscribeFromStore = self._peaksStore.subscribe((segmentDetailsHeight) => {
+    if (this._peaksStore) {
+      this._unsubscribeFromStore = this._peaksStore.subscribe((segmentDetailsHeight) => {
         this._group.y(segmentDetailsHeight)
       }, state => state.segmentDetailsHeight)
     }

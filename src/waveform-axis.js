@@ -41,7 +41,7 @@ define([
       options.axisLabelFontStyle
     );
 
-    self._paddingTop = options.paddingTop || 0;
+    self._peaksStore = options.peaksStore;
 
     self._axisShape = new Konva.Shape({
       sceneFunc: function(context) {
@@ -147,12 +147,12 @@ define([
     var width  = view.getWidth();
     var height = view.getHeight();
 
-    const paddingTop = this._paddingTop;
+    const segmentDetailsHeight = this._peaksStore ? this._peaksStore.getState().segmentDetailsHeight : 0;
 
-    if (paddingTop !== 0) {
+    if (segmentDetailsHeight !== 0) {
       context.beginPath();
-      context.moveTo(0, paddingTop);
-      context.lineTo(width, paddingTop);
+      context.moveTo(0, segmentDetailsHeight);
+      context.lineTo(width, segmentDetailsHeight);
       context.stroke();
     }
 
@@ -165,8 +165,8 @@ define([
 
       context.beginPath();
       if (!this._axisHideTop) {
-        context.moveTo(x + 0.5, paddingTop);
-        context.lineTo(x + 0.5, paddingTop + markerHeight);
+        context.moveTo(x + 0.5, segmentDetailsHeight);
+        context.lineTo(x + 0.5, segmentDetailsHeight + markerHeight);
       }
       if (!this._axisHideBottom) {
         context.moveTo(x + 0.5, height);

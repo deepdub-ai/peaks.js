@@ -38,7 +38,7 @@ define([
     this._playheadColor = options.playheadColor;
     this._playheadTextColor = options.playheadTextColor;
 
-    this._paddingTop = options.paddingTop;
+    this._peaksStore = options.peaksStore;
 
     this._playheadFontFamily = options.playheadFontFamily || 'sans-serif';
     this._playheadFontSize = options.playheadFontSize || 11;
@@ -130,9 +130,15 @@ define([
 
     this._playheadGroup = new Konva.Group({
       x: 0,
-      y: this._paddingTop,
+      y: this._peaksStore ? this._peaksStore.getState().segmentDetailsHeight : 0,
       listening: false,
     });
+
+    if (this._peaksStore) {
+      this._unsubscribeFromStore = this._peaksStore.subscribe((segmentDetailsHeight) => {
+        this._playheadGroup.y(segmentDetailsHeight)
+      }, state => state.segmentDetailsHeight)
+    }
 
     this._playheadGroup.add(this._playheadLine);
     this._playheadLayer.add(this._playheadGroup);
@@ -337,6 +343,10 @@ define([
   };
 
   PlayheadLayer.prototype.destroy = function() {
+    if (this._unsubscribeFromStore) {
+      this._unsubscribeFromStore();
+    }
+
     if (this._playheadLineAnimation) {
       this._playheadLineAnimation.stop();
       this._playheadLineAnimation = null;

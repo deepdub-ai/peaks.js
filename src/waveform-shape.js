@@ -33,9 +33,9 @@ define(['./utils', 'konva'], function(Utils, Konva) {
 
   function WaveformShape(options) {
     this._color = options.color;
-    this._paddingTop = options.paddingTop || 0;
     this._type = options.type || 'playback';
     this._pattern = options.pattern;
+    this._peaksStore = options.peaksStore;
 
     var shapeOptions = {};
 
@@ -112,11 +112,11 @@ define(['./utils', 'konva'], function(Utils, Konva) {
       return
     }
 
-    const paddingTop = this._paddingTop;
+    const segmentDetailsHeight = this._peaksStore ? this._peaksStore.getState().segmentDetailsHeight : 0;
 
     var frameOffset = this._view.getFrameOffset();
     var width = this._view.getWidth();
-    var height = this._view.getHeight() - paddingTop;
+    var height = this._view.getHeight() - segmentDetailsHeight;
 
     this._drawWaveform(
       context,
@@ -126,7 +126,7 @@ define(['./utils', 'konva'], function(Utils, Konva) {
       Math.floor(this._segment ? this._view.timeToPixels(this._segment.endTime)   : frameOffset + width),
       width,
       height,
-      paddingTop
+      segmentDetailsHeight
     );
   };
 
@@ -146,7 +146,7 @@ define(['./utils', 'konva'], function(Utils, Konva) {
    */
 
   WaveformShape.prototype._drawWaveform = function(context, waveformData,
-      frameOffset, startPixels, endPixels, width, height, paddingTop) {
+      frameOffset, startPixels, endPixels, width, height, segmentDetailsHeight) {
     if (startPixels < frameOffset) {
       startPixels = frameOffset;
     }
@@ -179,7 +179,7 @@ define(['./utils', 'konva'], function(Utils, Konva) {
         endPixels,
         waveformTop,
         waveformHeight,
-        paddingTop
+        segmentDetailsHeight
       );
 
       waveformTop += waveformHeight;
@@ -202,7 +202,7 @@ define(['./utils', 'konva'], function(Utils, Konva) {
    */
 
   WaveformShape.prototype._drawChannel = function(context, channel,
-      frameOffset, startPixels, endPixels, top, height, paddingTop) {
+      frameOffset, startPixels, endPixels, top, height, segmentDetailsHeight) {
     var x, amplitude;
 
     var amplitudeScale = this._view.getAmplitudeScale();
@@ -231,7 +231,7 @@ define(['./utils', 'konva'], function(Utils, Konva) {
       amplitude = channel.min_sample(x);
 
       lineX = x - frameOffset + 0.5;
-      lineY = top + WaveformShape.scaleY(amplitude, height, amplitudeScale) + 0.5 + paddingTop;
+      lineY = top + WaveformShape.scaleY(amplitude, height, amplitudeScale) + 0.5 + segmentDetailsHeight;
 
       context.lineTo(lineX, lineY);
     }
@@ -240,7 +240,7 @@ define(['./utils', 'konva'], function(Utils, Konva) {
       amplitude = channel.max_sample(x);
 
       lineX = x - frameOffset + 0.5;
-      lineY = top + WaveformShape.scaleY(amplitude, height, amplitudeScale) + 0.5 + paddingTop;
+      lineY = top + WaveformShape.scaleY(amplitude, height, amplitudeScale) + 0.5 + segmentDetailsHeight;
 
       context.lineTo(lineX, lineY);
     }

@@ -63,6 +63,8 @@ define([
     self._onKeyboardShiftRight = self._onKeyboardShiftRight.bind(self);
     self._updateTime = self._updateTime.bind(self);
 
+    self.render = self.render.bind(self);
+
     // Register event handlers
     // self._peaks.on('player.timeupdate', self._onTimeUpdate);
     self._peaks.on("player.playing", self._onPlay);
@@ -98,8 +100,6 @@ define([
     // The pixel offset of the current frame being displayed
     self._frameOffset = 0;
 
-    self._zoomviewPaddingTop = self._options.zoomviewPaddingTop || 0;
-
     self._stage = new Konva.Stage({
       container: container,
       width: self._width,
@@ -110,10 +110,10 @@ define([
 
     self._createWaveform();
 
-    self._segmentsLayer = new SegmentsLayer(peaks, self, true, self._zoomviewPaddingTop);
+    self._segmentsLayer = new SegmentsLayer(peaks, self, true);
     self._segmentsLayer.addToStage(self._stage);
 
-    self._pointsLayer = new PointsLayer(peaks, self, true, self._zoomviewPaddingTop);
+    self._pointsLayer = new PointsLayer(peaks, self, true);
     self._pointsLayer.addToStage(self._stage);
 
     self._pointingDevice = Utils.detectPointingDevice();
@@ -131,7 +131,7 @@ define([
       playheadFontFamily: self._options.fontFamily,
       playheadFontSize: self._options.fontSize,
       playheadFontStyle: self._options.fontStyle,
-      paddingTop: self._zoomviewPaddingTop,
+      peaksStore: self._peaksStore,
     });
 
     self._playheadLayer.addToStage(self._stage);
@@ -759,7 +759,7 @@ define([
       color: this._options.zoomWaveformColor,
       view: this,
       pattern: this._peaks.options.zoomviewPattern,
-      paddingTop: this._zoomviewPaddingTop,
+      peaksStore: this._peaksStore,
       type: this._options.type
     });
 
@@ -778,7 +778,7 @@ define([
       axisLabelFontFamily: this._options.fontFamily,
       axisLabelFontSize: this._options.fontSize,
       axisLabelFontStyle: this._options.fontStyle,
-      paddingTop: this._zoomviewPaddingTop,
+      peaksStore: this._peaksStore,
       axisHideTop: this._options.axisHideTop,
       axisHideBottom: this._options.axisHideBottom,
     });
@@ -924,6 +924,11 @@ define([
   WaveformZoomView.prototype.setAxisHideBottom = function (value) {
     this._axis.setAxisHideBottom(value);
   };
+
+  WaveformZoomView.prototype.render = function () {
+    this._updateWaveform(this._frameOffset, 'explicit-render');
+  },
+
   /* WaveformZoomView.prototype.beginZoom = function() {
     // Fade out the time axis and the segments
     // this._axis.axisShape.setAttr('opacity', 0);

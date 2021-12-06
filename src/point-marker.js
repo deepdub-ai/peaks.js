@@ -41,7 +41,7 @@ define([
     this._marker    = options.marker;
     this._draggable = options.draggable;
 
-    this._paddingTop = options.paddingTop || 0;
+    this._peaksStore = options.peaksStore;
 
     this._onDblClick   = options.onDblClick;
     this._onDragStart  = options.onDragStart;
@@ -55,9 +55,15 @@ define([
     this._group = new Konva.Group({
       draggable:     this._draggable,
       dragBoundFunc: this._dragBoundFunc,
-      y:             this._paddingTop,
+      y:             self._peaksStore ? self._peaksStore.getState().segmentDetailsHeight : 0,
       listening:     false,
     });
+
+    if (self._peaksStore) {
+      self._unsubscribeFromStore = self._peaksStore.subscribe((segmentDetailsHeight) => {
+        this._group.y(segmentDetailsHeight)
+      }, state => state.segmentDetailsHeight)
+    }
 
     this._bindDefaultEventHandlers();
 
@@ -135,6 +141,10 @@ define([
   };
 
   PointMarker.prototype.destroy = function() {
+    if (this._unsubscribeFromStore) {
+      this._unsubscribeFromStore();
+    }
+
     if (this._marker.destroy) {
       this._marker.destroy();
     }

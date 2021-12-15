@@ -88,7 +88,9 @@ define([
   }
 
   SegmentShape.prototype._getSegmentDetailsHeight = function() {
-    return store.getStore().getState().getSegmentDetailsHeight(store.getTrackId());
+    return this._view.getName() === 'zoomview'
+      ? store.getStore().getState().getSegmentDetailsHeight(store.getTrackId())
+      : 0;
   },
 
   SegmentShape.prototype.updatePosition = function() {

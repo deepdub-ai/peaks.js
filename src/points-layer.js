@@ -170,6 +170,7 @@ define([
       onDragEnd:    this._onPointHandleDragEnd,
       onMouseEnter: this._onPointHandleMouseEnter,
       onMouseLeave: this._onPointHandleMouseLeave,
+      view:         this._view.getName(),
     });
   };
 

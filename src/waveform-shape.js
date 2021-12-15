@@ -111,7 +111,9 @@ define(['./utils', 'konva', './store'], function(Utils, Konva, store) {
       return
     }
 
-    const segmentDetailsHeight = store.getStore().getState().getSegmentDetailsHeight(store.getTrackId());
+    const segmentDetailsHeight = this._view.getName() === 'zoomview'
+      ? store.getStore().getState().getSegmentDetailsHeight(store.getTrackId())
+      : 0;
 
     var frameOffset = this._view.getFrameOffset();
     var width = this._view.getWidth();

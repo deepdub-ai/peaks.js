@@ -146,7 +146,9 @@ define([
     var width  = view.getWidth();
     var height = view.getHeight();
 
-    const segmentDetailsHeight = store.getStore().getState().getSegmentDetailsHeight(store.getTrackId());
+    const segmentDetailsHeight = view.getName() === 'zoomview'
+      ? store.getStore().getState().getSegmentDetailsHeight(store.getTrackId())
+      : 0;
 
     if (segmentDetailsHeight !== 0) {
       context.beginPath();

@@ -218,26 +218,7 @@ define([
   };
 
   WaveformOverview.prototype._onWindowResize = function() {
-    var self = this;
-
-    if (self._resizeTimeoutId) {
-      clearTimeout(self._resizeTimeoutId);
-      self._resizeTimeoutId = null;
-    }
-
-    // Avoid resampling waveform data to zero width
-    if (self._container.clientWidth !== 0) {
-      self._width = self._container.clientWidth;
-      self._stage.setWidth(self._width);
-
-      self._resizeTimeoutId = setTimeout(function() {
-        self._width = self._container.clientWidth;
-        self._data = self._originalWaveformData.resample({ width: self._width });
-        self._stage.setWidth(self._width);
-
-        self._updateWaveform();
-      }, 500);
-    }
+    this.fitToContainer();
   };
 
   WaveformOverview.prototype.setWaveformData = function(waveformData) {
@@ -418,23 +399,23 @@ define([
   };
 
   WaveformOverview.prototype.fitToContainer = function() {
-    if (this._container.clientWidth === 0 && this._container.clientHeight === 0) {
+    if (this._container.clientWidth === 0 || this._container.clientHeight === 0) {
       return;
     }
-
-    var updateWaveform = false;
 
     if (this._container.clientWidth !== this._width) {
       this._width = this._container.clientWidth;
       this._stage.setWidth(this._width);
 
-      try {
+      if (this._resizeTimeoutId) {
+        clearTimeout(this._resizeTimeoutId);
+      }
+
+      this._resizeTimeoutId = setTimeout(() => {
         this._data = this._originalWaveformData.resample({ width: this._width });
-        updateWaveform = true;
-      }
-      catch (error) {
-        // Ignore, and leave this._data as it was
-      }
+        this._updateWaveform();
+        this._resizeTimeoutId = null;
+      }, 500);
     }
 
     this._height = this._container.clientHeight;
@@ -446,10 +427,6 @@ define([
     this._pointsLayer.fitToView();
     this._highlightLayer.fitToView();
 
-    if (updateWaveform) {
-      this._updateWaveform();
-    }
-
     this._stage.draw();
   };
 
@@ -460,7 +437,6 @@ define([
   WaveformOverview.prototype.destroy = function() {
     if (this._resizeTimeoutId) {
       clearTimeout(this._resizeTimeoutId);
-      this._resizeTimeoutId = null;
     }
 
     this._peaks.off('player.play', this._onPlay);

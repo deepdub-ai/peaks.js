@@ -6,7 +6,7 @@
  * @module waveform-shape
  */
 
-define(['./utils', 'konva'], function(Utils, Konva) {
+define(['./utils', 'konva', './store'], function(Utils, Konva, store) {
   'use strict';
 
   /**
@@ -35,7 +35,6 @@ define(['./utils', 'konva'], function(Utils, Konva) {
     this._color = options.color;
     this._type = options.type || 'playback';
     this._pattern = options.pattern;
-    this._peaksStore = options.peaksStore;
 
     var shapeOptions = {};
 
@@ -112,7 +111,7 @@ define(['./utils', 'konva'], function(Utils, Konva) {
       return
     }
 
-    const segmentDetailsHeight = this._peaksStore ? this._peaksStore.getState().segmentDetailsHeight : 0;
+    const segmentDetailsHeight = store.getStore().getState().getSegmentDetailsHeight(store.getTrackId());
 
     var frameOffset = this._view.getFrameOffset();
     var width = this._view.getWidth();

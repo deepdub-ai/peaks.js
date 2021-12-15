@@ -9,7 +9,7 @@
 define([
   './point-marker',
   './utils',
-  'konva'
+  'konva',
 ], function(
     PointMarker,
     Utils,
@@ -170,7 +170,6 @@ define([
       onDragEnd:    this._onPointHandleDragEnd,
       onMouseEnter: this._onPointHandleMouseEnter,
       onMouseLeave: this._onPointHandleMouseLeave,
-      peaksStore:   this._peaks.options.peaksStore,
     });
   };
 

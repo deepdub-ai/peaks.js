@@ -8,8 +8,9 @@
 
 define([
   './utils',
-  'konva'
-], function(Utils, Konva) {
+  'konva',
+  './store'
+], function(Utils, Konva, store) {
   'use strict';
 
   /**
@@ -40,8 +41,6 @@ define([
       options.axisLabelFontSize,
       options.axisLabelFontStyle
     );
-
-    self._peaksStore = options.peaksStore;
 
     self._axisShape = new Konva.Shape({
       sceneFunc: function(context) {
@@ -147,7 +146,7 @@ define([
     var width  = view.getWidth();
     var height = view.getHeight();
 
-    const segmentDetailsHeight = this._peaksStore ? this._peaksStore.getState().segmentDetailsHeight : 0;
+    const segmentDetailsHeight = store.getStore().getState().getSegmentDetailsHeight(store.getTrackId());
 
     if (segmentDetailsHeight !== 0) {
       context.beginPath();

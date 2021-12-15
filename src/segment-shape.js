@@ -8,10 +8,12 @@
 
 define([
   './segment-marker',
-  './waveform-shape'
+  './waveform-shape',
+  './store'
 ], function(
     SegmentMarker,
-    WaveformShape) {
+    WaveformShape,
+    store) {
   'use strict';
 
   var defaultFontFamily = 'sans-serif';
@@ -48,7 +50,6 @@ define([
         pattern: segment.pattern,
         view:    view,
         segment: segment,
-        peaksStore: this._peaks.options.peaksStore,
       });
     }
 
@@ -87,7 +88,7 @@ define([
   }
 
   SegmentShape.prototype._getSegmentDetailsHeight = function() {
-    return this._peaks.options.peaksStore.getState().segmentDetailsHeight;
+    return store.getStore().getState().getSegmentDetailsHeight(store.getTrackId());
   },
 
   SegmentShape.prototype.updatePosition = function() {

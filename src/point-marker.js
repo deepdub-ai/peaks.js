@@ -7,8 +7,9 @@
  */
 
 define([
-  'konva'
-], function(Konva) {
+  'konva',
+  './store'
+], function(Konva, store) {
   'use strict';
 
   /**
@@ -41,7 +42,6 @@ define([
     this._marker    = options.marker;
     this._draggable = options.draggable;
 
-    this._peaksStore = options.peaksStore;
 
     this._onDblClick   = options.onDblClick;
     this._onDragStart  = options.onDragStart;
@@ -55,15 +55,13 @@ define([
     this._group = new Konva.Group({
       draggable:     this._draggable,
       dragBoundFunc: this._dragBoundFunc,
-      y:             this._peaksStore ? this._peaksStore.getState().segmentDetailsHeight : 0,
+      y:             store.getStore().getState().getSegmentDetailsHeight(store.getTrackId()),
       listening:     false,
     });
 
-    if (this._peaksStore) {
-      this._unsubscribeFromStore = this._peaksStore.subscribe((segmentDetailsHeight) => {
-        this._group.y(segmentDetailsHeight)
-      }, state => state.segmentDetailsHeight)
-    }
+    this._unsubscribeFromStore = store.getStore().subscribe((segmentDetailsHeight) => {
+      this._group.y(segmentDetailsHeight)
+    }, state => state.getSegmentDetailsHeight(store.getTrackId()))
 
     this._bindDefaultEventHandlers();
 

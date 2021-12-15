@@ -18,6 +18,7 @@ define([
   "./utils",
   "konva",
   "lodash.throttle",
+  './store'
 ], function (
   MouseDragHandler,
   PlayheadLayer,
@@ -29,7 +30,8 @@ define([
   // StaticZoomAdapter,
   Utils,
   Konva,
-  _throttle
+  _throttle,
+  store
 ) {
   "use strict";
 
@@ -50,7 +52,6 @@ define([
     self._originalWaveformData = waveformData;
     self._container = container;
     self._peaks = peaks;
-    self._peaksStore = peaks.options.peaksStore;
 
     // Bind event handlers
     // self._onTimeUpdate = self._onTimeUpdate.bind(self);
@@ -131,7 +132,6 @@ define([
       playheadFontFamily: self._options.fontFamily,
       playheadFontSize: self._options.fontSize,
       playheadFontStyle: self._options.fontStyle,
-      peaksStore: self._peaksStore,
     });
 
     self._playheadLayer.addToStage(self._stage);
@@ -149,7 +149,7 @@ define([
       initMousePosX: 0,
 
       onMouseDown: function (mousePosX, event) {
-        self._peaksStore.setState({ isDragging: true });
+        store.getStore().setState({ isDragging: true });
 
         this.isAltKeyDownWhenMouseDown = event.evt.altKey;
         this.initialFrameOffset = self._frameOffset;
@@ -279,7 +279,7 @@ define([
           this.pointerLockTarget.releasePointerCapture(1);
         }
 
-        self._peaksStore.setState({ isDragging: false });
+        store.getStore().setState({ isDragging: false });
 
         // Set playhead position only on click release, when not dragging.
         var mouseDownX = Math.floor(this.mouseDownX);
@@ -326,7 +326,7 @@ define([
           return;
         }
 
-        self._peaksStore.setState({ timeAtLastWheelEvent: performance.now() });
+        store.getStore().setState({ timeAtLastWheelEvent: performance.now() });
 
         event.preventDefault();
 
@@ -389,7 +389,7 @@ define([
     const overview = this._peaks.views.getView('overview');
     const isSeeking = overview && overview._isSeeking;
 
-    const state = this._peaksStore.getState();
+    const state = store.getStore().getState();
 
     const currentTime = this._peaks.player.getCurrentTime();
     if (currentTime === this._prevCurrentTime) {
@@ -420,7 +420,7 @@ define([
   };
 
   WaveformZoomView.prototype._onPlay = function (time) {
-    this._peaksStore.setState({ timeAtLastPlayEvent: performance.now() });
+    store.getStore().setState({ timeAtLastPlayEvent: performance.now() });
     this._playheadLayer.updatePlayheadTime(time);
   };
 
@@ -759,7 +759,6 @@ define([
       color: this._options.zoomWaveformColor,
       view: this,
       pattern: this._peaks.options.zoomviewPattern,
-      peaksStore: this._peaksStore,
       type: this._options.type
     });
 
@@ -778,7 +777,6 @@ define([
       axisLabelFontFamily: this._options.fontFamily,
       axisLabelFontSize: this._options.fontSize,
       axisLabelFontStyle: this._options.fontStyle,
-      peaksStore: this._peaksStore,
       axisHideTop: this._options.axisHideTop,
       axisHideBottom: this._options.axisHideBottom,
     });

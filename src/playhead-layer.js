@@ -7,8 +7,9 @@
  */
 
 define([
-  'konva'
-], function(Konva) {
+  'konva',
+  './store'
+], function(Konva, store) {
   'use strict';
 
   /**
@@ -37,8 +38,6 @@ define([
     this._playheadVisible = false;
     this._playheadColor = options.playheadColor;
     this._playheadTextColor = options.playheadTextColor;
-
-    this._peaksStore = options.peaksStore;
 
     this._playheadFontFamily = options.playheadFontFamily || 'sans-serif';
     this._playheadFontSize = options.playheadFontSize || 11;
@@ -130,14 +129,14 @@ define([
 
     this._playheadGroup = new Konva.Group({
       x: 0,
-      y: this._peaksStore ? this._peaksStore.getState().segmentDetailsHeight : 0,
+      y: store.getStore().getState().getSegmentDetailsHeight(store.getTrackId()),
       listening: false,
     });
 
-    if (this._peaksStore) {
-      this._unsubscribeFromStore = this._peaksStore.subscribe((segmentDetailsHeight) => {
+    if (store.getStore().getState()) {
+      this._unsubscribeFromStore = store.getStore().subscribe((segmentDetailsHeight) => {
         this._playheadGroup.y(segmentDetailsHeight)
-      }, state => state.segmentDetailsHeight)
+      }, state => state.getSegmentDetailsHeight(store.getTrackId()))
     }
 
     this._playheadGroup.add(this._playheadLine);

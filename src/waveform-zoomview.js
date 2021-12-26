@@ -577,7 +577,7 @@ define([
         this._frameOffset = 0;
       }
 
-      this._updateWaveform(this._frameOffset, 'auto-scroll');
+      this._updateWaveform(this._frameOffset, options.cause || 'auto-scroll');
     }
   };
 

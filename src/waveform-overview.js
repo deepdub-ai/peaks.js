@@ -153,7 +153,7 @@ define([
         self._playheadLayer.updatePlayheadTime(time);
 
         self._peaks.player.seek(time);
-        self._peaks.views.getView('zoomview')._syncPlayhead(timeCentered, { exact: true, playheadTime: time });
+        self._peaks.views.getView('zoomview')._syncPlayhead(timeCentered, { exact: true, playheadTime: time, cause: 'overview-drag-scroll' });
       } else {
         let time = self.pixelsToTime(mousePosX - self._highlightLayer._width / 2);
         const duration = self._getDuration();
@@ -161,7 +161,7 @@ define([
         if (time > duration) {
           time = duration;
         }
-        self._peaks.views.getView('zoomview')._syncPlayhead(time, { exact: true, persistPlayhead: true });
+        self._peaks.views.getView('zoomview')._syncPlayhead(time, { exact: true, persistPlayhead: true, cause: 'overview-drag-scroll' });
       }
     }
 

@@ -35,6 +35,7 @@ define(['./utils', 'konva', './store'], function(Utils, Konva, store) {
     this._color = options.color;
     this._type = options.type || 'playback';
     this._pattern = options.pattern;
+    this._peaks = options.peaks;
 
     this.viewName = options.view.getName()
 
@@ -157,7 +158,7 @@ define(['./utils', 'konva', './store'], function(Utils, Konva, store) {
       const sceneFuncCallId = this._sceneFuncCallId;
       const frameOffset = this._view.getFrameOffset();
 
-      const originalWaveformData = window.peaksStore.getState().getOriginalWaveformById('zoomview', this._segment.waveformId)
+      const originalWaveformData = this._peaks.options.store.getState().getOriginalWaveformById('zoomview', this._segment.waveformId)
       if (originalWaveformData) {
         drawWaveform(originalWaveformData);
       }

@@ -182,7 +182,7 @@ define([
           return false
         }
 
-        self._peaksStore.setState({ isDragging: true });
+        self._peaks.options.store.setState({ isDragging: true });
 
         self._peaks.emit("zoomview.mousedown", time, event);
 
@@ -432,7 +432,7 @@ define([
     // becomes visible again.
     //
     if (!state.tracksVisibility[this._peaks.options.trackId]) {
-      const unsubscribe = this._peaksStore.subscribe(
+      const unsubscribe = this._peaks.options.store.subscribe(
         (isVisible) => {
           if (isVisible) {
             window.requestAnimationFrame(this._updateTime);
@@ -717,7 +717,7 @@ define([
     // we call the callback function.
     // Note that we only call it if this is last invocation of `_resampleData`.
     //
-    this._peaks.options.peaksStore.getState().resampleWaveforms('zoomview', options).then(() => {
+    this._peaks.options.store.getState().resampleWaveforms('zoomview', options).then(() => {
       if (this._resampleDataCallId !== resampleDataCallId) {
         return
       }
@@ -863,7 +863,8 @@ define([
       color: this._options.zoomWaveformColor,
       view: this,
       pattern: this._peaks.options.zoomviewPattern,
-      type: this._options.type
+      type: this._options.type,
+      peaks: this._peaks,
     });
 
     this._waveformLayer.add(this._waveformShape);

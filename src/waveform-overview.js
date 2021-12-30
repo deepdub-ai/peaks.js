@@ -248,7 +248,7 @@ define([
     //     self._width = self._container.clientWidth;
     //     const options = { width: self._width }
     //     self._data = self._originalWaveformData.resample(options);
-    //     this._peaks.options.peaksStore.getState().resampleWaveforms('overview', options)
+    //     this._peaks.options.store.getState().resampleWaveforms('overview', options)
     //     self._stage.setWidth(self._width);
 
     //     self._updateWaveform();
@@ -371,7 +371,8 @@ define([
   WaveformOverview.prototype._createWaveform = function() {
     this._waveformShape = new WaveformShape({
       color: this._options.overviewWaveformColor,
-      view: this
+      view: this,
+      peaks: this._peaks,
     });
 
     this._waveformLayer.add(this._waveformShape);
@@ -453,7 +454,7 @@ define([
 
       try {
         const options = { width: this._width }
-        this._peaks.options.peaksStore.getState().resampleWaveforms('overview', options)
+        this._peaks.options.store.getState().resampleWaveforms('overview', options)
         this._data = this._originalWaveformData.resample(options);
         // updateWaveform = true;
       }

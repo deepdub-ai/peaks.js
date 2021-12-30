@@ -54,6 +54,7 @@ define([
         segment: segment,
         getWaveformData: segment.waveformId ? this.getWaveformData : undefined,
         paddingTop: this._paddingTop,
+        peaks:   peaks,
       });
     }
 
@@ -295,9 +296,9 @@ define([
     const view = this._view.getName()
 
     if (options && options.async) {
-      return this._peaks.options.peaksStore.getState().awaitWaveformById(view, this._segment.waveformId)
+      return this._peaks.options.store.getState().awaitWaveformById(view, this._segment.waveformId)
     } else {
-      const waveform = this._peaks.options.peaksStore.getState().getWaveformById(view, this._segment.waveformId)
+      const waveform = this._peaks.options.store.getState().getWaveformById(view, this._segment.waveformId)
 
       if (!waveform) {
         return null

@@ -7,8 +7,9 @@
  */
 
 define([
-  'konva'
-], function(Konva) {
+  'konva',
+  './store'
+], function(Konva, store) {
   'use strict';
 
   /**
@@ -37,8 +38,6 @@ define([
     this._playheadVisible = false;
     this._playheadColor = options.playheadColor;
     this._playheadTextColor = options.playheadTextColor;
-
-    this._paddingTop = options.paddingTop;
 
     this._playheadFontFamily = options.playheadFontFamily || 'sans-serif';
     this._playheadFontSize = options.playheadFontSize || 11;
@@ -130,9 +129,17 @@ define([
 
     this._playheadGroup = new Konva.Group({
       x: 0,
-      y: this._paddingTop,
+      y: this._view.getName() === 'zoomview'
+        ? store.getStore().getState().getSegmentDetailsHeight(store.getTrackId())
+        : 0,
       listening: false,
     });
+
+    if (this._view.getName() === 'zoomview') {
+      this._unsubscribeFromStore = store.getStore().subscribe((segmentDetailsHeight) => {
+        this._playheadGroup.y(segmentDetailsHeight)
+      }, state => state.getSegmentDetailsHeight(store.getTrackId()))
+    }
 
     this._playheadGroup.add(this._playheadLine);
     this._playheadLayer.add(this._playheadGroup);
@@ -337,6 +344,10 @@ define([
   };
 
   PlayheadLayer.prototype.destroy = function() {
+    if (this._unsubscribeFromStore) {
+      this._unsubscribeFromStore();
+    }
+
     if (this._playheadLineAnimation) {
       this._playheadLineAnimation.stop();
       this._playheadLineAnimation = null;

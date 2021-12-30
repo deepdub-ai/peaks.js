@@ -18,7 +18,8 @@ define([
   './view-controller',
   './zoom-controller',
   './waveform-builder',
-  './utils'
+  './utils',
+  './store'
 ], function(
     EventEmitter,
     CueEmitter,
@@ -31,7 +32,8 @@ define([
     ViewController,
     ZoomController,
     WaveformBuilder,
-    Utils) {
+    Utils,
+    store) {
   'use strict';
 
   function buildUi(container) {
@@ -289,6 +291,9 @@ define([
 
   Peaks.init = function(opts, callback) {
     var instance = new Peaks();
+
+    store.setStore(opts.store)
+    store.setTrackId(opts.trackId)
 
     opts = opts || {};
 

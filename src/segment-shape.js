@@ -8,10 +8,12 @@
 
 define([
   './segment-marker',
-  './waveform-shape'
+  './waveform-shape',
+  './store'
 ], function(
     SegmentMarker,
-    WaveformShape) {
+    WaveformShape,
+    store) {
   'use strict';
 
   var defaultFontFamily = 'sans-serif';
@@ -30,12 +32,11 @@ define([
    * @param {WaveformOverview|WaveformZoomView} view
    */
 
-  function SegmentShape(segment, peaks, layer, view, paddingTop) {
+  function SegmentShape(segment, peaks, layer, view) {
     this._segment       = segment;
     this._peaks         = peaks;
     this._layer         = layer;
     this._view          = view;
-    this._paddingTop    = paddingTop || 0;
     this._waveformShape = null;
     this._label         = null;
     this._startMarker   = null;
@@ -59,6 +60,7 @@ define([
     this._onMouseEnter = this._onMouseEnter.bind(this);
     this._onMouseLeave = this._onMouseLeave.bind(this);
     this._onClick      = this._onClick.bind(this);
+    this._getSegmentDetailsHeight = this._getSegmentDetailsHeight.bind(this);
 
     // Set up event handlers to show/hide the segment label text when the user
     // hovers the mouse over the segment.
@@ -88,6 +90,12 @@ define([
 
     this._createMarkers();
   }
+
+  SegmentShape.prototype._getSegmentDetailsHeight = function() {
+    return this._view.getName() === 'zoomview'
+      ? store.getStore().getState().getSegmentDetailsHeight(store.getTrackId())
+      : 0;
+  },
 
   SegmentShape.prototype.updatePosition = function() {
     var segmentStartOffset = this._view.timeToPixels(this._segment.startTime);
@@ -159,7 +167,7 @@ define([
       layer:        this._layer,
       view:         this._view.getName(),
       getEndMarker: () => this._endMarker,
-      paddingTop:   this._paddingTop,
+      segmentDetailsHeight: this._getSegmentDetailsHeight(),
     });
 
     if (startMarker) {
@@ -188,7 +196,7 @@ define([
       layer:        this._layer,
       view:         this._view.getName(),
       getStartMarker: () => this._startMarker,
-      paddingTop:   this._paddingTop,
+      segmentDetailsHeight: this._getSegmentDetailsHeight(),
     });
 
     if (endMarker) {

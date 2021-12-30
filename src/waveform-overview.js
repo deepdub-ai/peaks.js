@@ -218,32 +218,43 @@ define([
   };
 
   WaveformOverview.prototype._onWindowResize = function() {
-    var self = this;
+    //
+    // After merge changes from SEGMENTS PANELS, it seems like the following
+    // commented-out block of code is no longer needed.
+    //
+    // Note that I made changes to this commented-out block in the GENEDIT
+    // branch.
+    //
+    // TODO So just make sure resizing the window still works as expected.
+    //
 
-    if (self._resizeTimeoutId) {
-      clearTimeout(self._resizeTimeoutId);
-      self._resizeTimeoutId = null;
-    }
+    // var self = this;
 
-    // Avoid resampling waveform data to zero width
-    if (self._container.clientWidth !== 0) {
-      self._width = self._container.clientWidth;
-      self._stage.setWidth(self._width);
+    // if (self._resizeTimeoutId) {
+    //   clearTimeout(self._resizeTimeoutId);
+    //   self._resizeTimeoutId = null;
+    // }
 
-      self._resizeTimeoutId = setTimeout(function() {
-        if (self._originalWaveformData.duration === 0) {
-          return
-        }
+    // // Avoid resampling waveform data to zero width
+    // if (self._container.clientWidth !== 0) {
+    //   self._width = self._container.clientWidth;
+    //   self._stage.setWidth(self._width);
 
-        self._width = self._container.clientWidth;
-        const options = { width: self._width }
-        self._data = self._originalWaveformData.resample(options);
-        this._peaks.options.peaksStore.getState().resampleWaveforms('overview', options)
-        self._stage.setWidth(self._width);
+    //   self._resizeTimeoutId = setTimeout(function() {
+    //     if (self._originalWaveformData.duration === 0) {
+    //       return
+    //     }
 
-        self._updateWaveform();
-      }, 500);
-    }
+    //     self._width = self._container.clientWidth;
+    //     const options = { width: self._width }
+    //     self._data = self._originalWaveformData.resample(options);
+    //     this._peaks.options.peaksStore.getState().resampleWaveforms('overview', options)
+    //     self._stage.setWidth(self._width);
+
+    //     self._updateWaveform();
+    //   }, 500);
+    // }
+    this.fitToContainer();
   };
 
   WaveformOverview.prototype.setWaveformData = function(waveformData) {
@@ -432,11 +443,9 @@ define([
   };
 
   WaveformOverview.prototype.fitToContainer = function() {
-    if (this._container.clientWidth === 0 && this._container.clientHeight === 0) {
+    if (this._container.clientWidth === 0 || this._container.clientHeight === 0) {
       return;
     }
-
-    var updateWaveform = false;
 
     if (this._container.clientWidth !== this._width) {
       this._width = this._container.clientWidth;
@@ -446,11 +455,23 @@ define([
         const options = { width: this._width }
         this._peaks.options.peaksStore.getState().resampleWaveforms('overview', options)
         this._data = this._originalWaveformData.resample(options);
-        updateWaveform = true;
+        // updateWaveform = true;
       }
       catch (error) {
         // Ignore, and leave this._data as it was
+        // The following 2 lines of code were in SEGMENTS PANELS branch.
+        //
+        // TODO Make sure commenting them out doesn't break stuff.
+        //
+        // if (this._resizeTimeoutId) {
+        //   clearTimeout(this._resizeTimeoutId);
       }
+
+      this._resizeTimeoutId = setTimeout(() => {
+        this._data = this._originalWaveformData.resample({ width: this._width });
+        this._updateWaveform();
+        this._resizeTimeoutId = null;
+      }, 500);
     }
 
     this._height = this._container.clientHeight;
@@ -462,10 +483,6 @@ define([
     this._pointsLayer.fitToView();
     this._highlightLayer.fitToView();
 
-    if (updateWaveform) {
-      this._updateWaveform();
-    }
-
     this._stage.draw();
   };
 
@@ -476,7 +493,6 @@ define([
   WaveformOverview.prototype.destroy = function() {
     if (this._resizeTimeoutId) {
       clearTimeout(this._resizeTimeoutId);
-      this._resizeTimeoutId = null;
     }
 
     this._peaks.off('player.play', this._onPlay);

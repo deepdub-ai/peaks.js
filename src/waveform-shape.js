@@ -6,7 +6,7 @@
  * @module waveform-shape
  */
 
-define(['./utils', 'konva'], function(Utils, Konva) {
+define(['./utils', 'konva', './store'], function(Utils, Konva, store) {
   'use strict';
 
   /**
@@ -33,7 +33,6 @@ define(['./utils', 'konva'], function(Utils, Konva) {
 
   function WaveformShape(options) {
     this._color = options.color;
-    this._paddingTop = options.paddingTop || 0;
     this._type = options.type || 'playback';
     this._pattern = options.pattern;
 
@@ -125,11 +124,13 @@ define(['./utils', 'konva'], function(Utils, Konva) {
       return
     }
 
-    const paddingTop = this._paddingTop;
+    const segmentDetailsHeight = this._view.getName() === 'zoomview'
+      ? store.getStore().getState().getSegmentDetailsHeight(store.getTrackId())
+      : 0;
 
     var frameOffset = this._view.getFrameOffset();
     var width = this._view.getWidth();
-    var height = this._view.getHeight() - paddingTop;
+    var height = this._view.getHeight() - segmentDetailsHeight;
     let waveformData = this._getWaveformData();
     this._sceneFuncCallId++;
 
@@ -144,7 +145,7 @@ define(['./utils', 'konva'], function(Utils, Konva) {
         Math.floor(this._segment ? this._view.timeToPixels(this._segment.endTime)   : frameOffset + width),
         width,
         height,
-        paddingTop
+        segmentDetailsHeight
       );
     }
 
@@ -188,7 +189,7 @@ define(['./utils', 'konva'], function(Utils, Konva) {
    */
 
   WaveformShape.prototype._drawWaveform = function(context, waveformData,
-      frameOffset, startPixels, endPixels, width, height, paddingTop) {
+      frameOffset, startPixels, endPixels, width, height, segmentDetailsHeight) {
     if (startPixels < frameOffset) {
       startPixels = frameOffset;
     }
@@ -236,7 +237,7 @@ define(['./utils', 'konva'], function(Utils, Konva) {
         endPixels,
         waveformTop,
         waveformHeight,
-        paddingTop
+        segmentDetailsHeight
       );
 
       waveformTop += waveformHeight;
@@ -259,9 +260,9 @@ define(['./utils', 'konva'], function(Utils, Konva) {
    */
 
   WaveformShape.prototype._drawChannel = function(context, channel,
-      frameOffset, startPixels, endPixels, top, height, paddingTop) {
+      frameOffset, startPixels, endPixels, top, height, segmentDetailsHeight) {
     window._drawChannel.call(this, context, channel,
-      frameOffset, startPixels, endPixels, top, height, paddingTop, WaveformShape.scaleY)
+      frameOffset, startPixels, endPixels, top, height, segmentDetailsHeight, WaveformShape.scaleY)
   };
 
   WaveformShape.prototype._waveformShapeHitFunc = function(context) {

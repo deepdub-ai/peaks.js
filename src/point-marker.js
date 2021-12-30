@@ -7,8 +7,9 @@
  */
 
 define([
-  'konva'
-], function(Konva) {
+  'konva',
+  './store'
+], function(Konva, store) {
   'use strict';
 
   /**
@@ -40,8 +41,7 @@ define([
     this._point     = options.point;
     this._marker    = options.marker;
     this._draggable = options.draggable;
-
-    this._paddingTop = options.paddingTop || 0;
+    this._viewName  = options.view;
 
     this._onDblClick   = options.onDblClick;
     this._onDragStart  = options.onDragStart;
@@ -55,9 +55,15 @@ define([
     this._group = new Konva.Group({
       draggable:     this._draggable,
       dragBoundFunc: this._dragBoundFunc,
-      y:             this._paddingTop,
+      y:             this._viewName === 'zoomview' ? store.getStore().getState().getSegmentDetailsHeight(store.getTrackId()) : 0,
       listening:     false,
     });
+
+    if (this._viewName === 'zoomview') {
+      this._unsubscribeFromStore = store.getStore().subscribe((segmentDetailsHeight) => {
+        this._group.y(segmentDetailsHeight)
+      }, state => state.getSegmentDetailsHeight(store.getTrackId()))
+    }
 
     this._bindDefaultEventHandlers();
 
@@ -135,6 +141,10 @@ define([
   };
 
   PointMarker.prototype.destroy = function() {
+    if (this._unsubscribeFromStore) {
+      this._unsubscribeFromStore();
+    }
+
     if (this._marker.destroy) {
       this._marker.destroy();
     }

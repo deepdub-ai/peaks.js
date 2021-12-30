@@ -138,7 +138,7 @@ define([
     }
   });
 
-  Segment.prototype.update = function(options) {
+  Segment.prototype.update = function(options, updateOptions) {
     var opts = {
       startTime: this.startTime,
       endTime:   this.endTime,
@@ -161,7 +161,9 @@ define([
 
     this._setUserData(options);
 
-    this._peaks.emit('segments.update', this);
+    if (!updateOptions || !updateOptions.noEmit) {
+      this._peaks.emit('segments.update', this);
+    }
   };
 
   Segment.prototype._updateId = function(id) {

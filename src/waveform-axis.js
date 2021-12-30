@@ -8,8 +8,9 @@
 
 define([
   './utils',
-  'konva'
-], function(Utils, Konva) {
+  'konva',
+  './store'
+], function(Utils, Konva, store) {
   'use strict';
 
   /**
@@ -40,8 +41,6 @@ define([
       options.axisLabelFontSize,
       options.axisLabelFontStyle
     );
-
-    self._paddingTop = options.paddingTop || 0;
 
     self._axisShape = new Konva.Shape({
       sceneFunc: function(context) {
@@ -147,12 +146,14 @@ define([
     var width  = view.getWidth();
     var height = view.getHeight();
 
-    const paddingTop = this._paddingTop;
+    const segmentDetailsHeight = view.getName() === 'zoomview'
+      ? store.getStore().getState().getSegmentDetailsHeight(store.getTrackId())
+      : 0;
 
-    if (paddingTop !== 0) {
+    if (segmentDetailsHeight !== 0) {
       context.beginPath();
-      context.moveTo(0, paddingTop);
-      context.lineTo(width, paddingTop);
+      context.moveTo(0, segmentDetailsHeight);
+      context.lineTo(width, segmentDetailsHeight);
       context.stroke();
     }
 
@@ -165,8 +166,8 @@ define([
 
       context.beginPath();
       if (!this._axisHideTop) {
-        context.moveTo(x + 0.5, paddingTop);
-        context.lineTo(x + 0.5, paddingTop + markerHeight);
+        context.moveTo(x + 0.5, segmentDetailsHeight);
+        context.lineTo(x + 0.5, segmentDetailsHeight + markerHeight);
       }
       if (!this._axisHideBottom) {
         context.moveTo(x + 0.5, height);

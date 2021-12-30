@@ -18,6 +18,7 @@ define([
   "./utils",
   "konva",
   "lodash.throttle",
+  './store'
 ], function (
   MouseDragHandler,
   PlayheadLayer,
@@ -29,7 +30,8 @@ define([
   // StaticZoomAdapter,
   Utils,
   Konva,
-  _throttle
+  _throttle,
+  store
 ) {
   "use strict";
 
@@ -50,7 +52,6 @@ define([
     self._originalWaveformData = waveformData;
     self._container = container;
     self._peaks = peaks;
-    self._peaksStore = peaks.options.peaksStore;
 
     self._resampleDataCallId = 0;
 
@@ -65,6 +66,8 @@ define([
     self._onKeyboardShiftRight = self._onKeyboardShiftRight.bind(self);
     self._updateTime = self._updateTime.bind(self);
     self.getWaveformData = self.getWaveformData.bind(self);
+
+    self.render = self.render.bind(self);
 
     // Register event handlers
     // self._peaks.on('player.timeupdate', self._onTimeUpdate);
@@ -101,8 +104,6 @@ define([
     // The pixel offset of the current frame being displayed
     self._frameOffset = 0;
 
-    self._zoomviewPaddingTop = self._options.zoomviewPaddingTop || 0;
-
     self._stage = new Konva.Stage({
       container: container,
       width: self._width,
@@ -120,10 +121,10 @@ define([
 
     self._createWaveform();
 
-    self._segmentsLayer = new SegmentsLayer(peaks, self, true, self._zoomviewPaddingTop);
+    self._segmentsLayer = new SegmentsLayer(peaks, self, true);
     self._segmentsLayer.addToStage(self._stage);
 
-    self._pointsLayer = new PointsLayer(peaks, self, true, self._zoomviewPaddingTop);
+    self._pointsLayer = new PointsLayer(peaks, self, true);
     self._pointsLayer.addToStage(self._stage);
 
     self._pointingDevice = Utils.detectPointingDevice();
@@ -141,7 +142,6 @@ define([
       playheadFontFamily: self._options.fontFamily,
       playheadFontSize: self._options.fontSize,
       playheadFontStyle: self._options.fontStyle,
-      paddingTop: self._zoomviewPaddingTop,
     });
 
     self._playheadLayer.addToStage(self._stage);
@@ -162,6 +162,7 @@ define([
       preventContextMenu: true,
 
       onMouseDown: function (mousePosX, mousePosY, event) {
+        store.getStore().setState({ isDragging: true });
         this.isAltKeyDownWhenMouseDown = event.evt.altKey;
         this.initialFrameOffset = self._frameOffset;
         this._isShiftKeyDownOnMouseDown = event.evt.shiftKey;
@@ -312,7 +313,7 @@ define([
           this.pointerLockTarget.releasePointerCapture(1);
         }
 
-        self._peaksStore.setState({ isDragging: false });
+        store.getStore().setState({ isDragging: false });
 
         // Set playhead position only on click release, when not dragging.
         var mouseDownX = Math.floor(this.mouseDownX);
@@ -354,7 +355,7 @@ define([
           return;
         }
 
-        self._peaksStore.setState({ timeAtLastWheelEvent: performance.now() });
+        store.getStore().setState({ timeAtLastWheelEvent: performance.now() });
 
         event.preventDefault();
 
@@ -425,7 +426,7 @@ define([
     const overview = this._peaks.views.getView('overview');
     const isSeeking = overview && overview._isSeeking;
 
-    const state = this._peaksStore.getState();
+    const state = store.getStore().getState();
 
     // Stop this loop if track isn't visible, restart it when it
     // becomes visible again.
@@ -468,7 +469,7 @@ define([
   };
 
   WaveformZoomView.prototype._onPlay = function (time) {
-    this._peaksStore.setState({ timeAtLastPlayEvent: performance.now() });
+    store.getStore().setState({ timeAtLastPlayEvent: performance.now() });
     this._playheadLayer.updatePlayheadTime(time);
   };
 
@@ -862,7 +863,6 @@ define([
       color: this._options.zoomWaveformColor,
       view: this,
       pattern: this._peaks.options.zoomviewPattern,
-      paddingTop: this._zoomviewPaddingTop,
       type: this._options.type
     });
 
@@ -881,7 +881,6 @@ define([
       axisLabelFontFamily: this._options.fontFamily,
       axisLabelFontSize: this._options.fontSize,
       axisLabelFontStyle: this._options.fontStyle,
-      paddingTop: this._zoomviewPaddingTop,
       axisHideTop: this._options.axisHideTop,
       axisHideBottom: this._options.axisHideBottom,
     });
@@ -1041,6 +1040,10 @@ define([
   WaveformZoomView.prototype.getContainer = function () {
     return this._container;
   };
+
+  WaveformZoomView.prototype.render = function () {
+    this._updateWaveform(this._frameOffset, 'explicit-render');
+  },
 
   /* WaveformZoomView.prototype.beginZoom = function() {
     // Fade out the time axis and the segments

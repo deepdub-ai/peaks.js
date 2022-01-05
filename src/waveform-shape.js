@@ -260,10 +260,19 @@ define(['./utils', 'konva', './store'], function(Utils, Konva, store) {
    * @param {Number} height The height of the waveform channel area, in pixels.
    */
 
-  WaveformShape.prototype._drawChannel = function(context, channel,
-      frameOffset, startPixels, endPixels, top, height, segmentDetailsHeight) {
-    window._drawChannel.call(this, context, channel,
-      frameOffset, startPixels, endPixels, top, height, segmentDetailsHeight, WaveformShape.scaleY)
+  WaveformShape.prototype._drawChannel = function(context, channel, frameOffset, startPixels, endPixels, top, height, segmentDetailsHeight) {
+    store.getStore().getState().drawChannelFunc.call(
+      this,
+      context,
+      channel,
+      frameOffset,
+      startPixels,
+      endPixels,
+      top,
+      height,
+      segmentDetailsHeight,
+      WaveformShape.scaleY
+    )
   };
 
   WaveformShape.prototype._waveformShapeHitFunc = function(context) {

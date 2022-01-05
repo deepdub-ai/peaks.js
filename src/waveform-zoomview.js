@@ -279,6 +279,14 @@ define([
           this.totalMovementX += event.movementX;
           const time = calculateTime();
 
+          // This is a temporary fix for the issue where if the user scrolls
+          // too much to the left, they have to scroll the same length to the
+          // right to start dragging the segment.
+          //
+          if (time < 0) {
+            this.totalMovementX -= event.movementX;
+          }
+
           self._peaks.emit("zoomview.drag", time, event);
 
           if (event.ctrlKey) {

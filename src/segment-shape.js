@@ -301,7 +301,11 @@ define([
       const waveform = this._peaks.options.store.getState().getWaveformById(view, this._segment.waveformId)
 
       if (!waveform) {
-        return null
+        if (this.viewName === 'overview') {
+          return null;
+        }
+
+        return this._peaks.options.store.getState().getOriginalWaveformById('zoomview', this._segment.waveformId)
       }
 
       return waveform.data;

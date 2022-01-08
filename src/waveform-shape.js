@@ -125,14 +125,6 @@ define(['./utils', 'konva', './store'], function(Utils, Konva, store) {
     let waveformData = this._getWaveformData()
 
     if (!waveformData) {
-      if (this.viewName === 'overview') {
-        return
-      }
-
-      waveformData = this._peaks.options.store.getState().getOriginalWaveformById('zoomview', this._segment.waveformId)
-    }
-
-    if (!waveformData) {
       return
     }
 

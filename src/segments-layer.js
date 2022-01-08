@@ -36,7 +36,6 @@ define([
     this._layer         = new Konva.Layer();
 
     this._onSegmentsUpdate    = this._onSegmentsUpdate.bind(this);
-    this._onSegmentsUpdateId  = this._onSegmentsUpdateId.bind(this);
     this._onSegmentsAdd       = this._onSegmentsAdd.bind(this);
     this._onSegmentsRemove    = this._onSegmentsRemove.bind(this);
     this._onSegmentsHide      = this._onSegmentsHide.bind(this);
@@ -44,7 +43,6 @@ define([
     this._onSegmentsDragged   = this._onSegmentsDragged.bind(this);
 
     this._peaks.on('segments.update', this._onSegmentsUpdate);
-    this._peaks.on('segments.update_id', this._onSegmentsUpdateId);
     this._peaks.on('segments.add', this._onSegmentsAdd);
     this._peaks.on('segments.remove', this._onSegmentsRemove);
     this._peaks.on('segments.hide', this._onSegmentsHide);
@@ -95,15 +93,6 @@ define([
     if (redraw) {
       this.updateSegments(frameStartTime, frameEndTime);
     }
-  };
-
-  SegmentsLayer.prototype._onSegmentsUpdateId = function({ id, newId }) {
-    if (!this._segmentShapes[id]) {
-      return
-    }
-
-    this._segmentShapes[newId] = this._segmentShapes[id];
-    delete this._segmentShapes[id];
   };
 
   SegmentsLayer.prototype._onSegmentsAdd = function(segments) {
@@ -304,7 +293,6 @@ define([
 
   SegmentsLayer.prototype.destroy = function() {
     this._peaks.off('segments.update', this._onSegmentsUpdate);
-    this._peaks.off('segments.update_id', this._onSegmentsUpdateId);
     this._peaks.off('segments.add', this._onSegmentsAdd);
     this._peaks.off('segments.remove', this._onSegmentsRemove);
     this._peaks.off('segments.remove_all', this._onSegmentsRemoveAll);

@@ -166,25 +166,16 @@ define(['./utils', 'konva', './store'], function(Utils, Konva, store) {
       endPixels = limit;
     }
 
-    // if (!this._segment || !this._segment.type !== 'REGION_SELECTION') {
-      // if (waveformData.length === 1 && !this._segment) {
-      if (!this._segment) {
-        if (endPixels > waveformData.length) {
-          endPixels = waveformData.length;
-        }
-      } else if (this._segment.type !== 'SELECTION_REGION') {
-        // if (this._segment) {
-          const segmentStartPixel = this._view.timeToPixels(this._segment.startTime);
-          if (endPixels > segmentStartPixel + waveformData.length) {
-            endPixels = segmentStartPixel + waveformData.length;
-          }
-        // } else {
-        //   if (endPixels > waveformData.length) {
-        //     endPixels = waveformData.length;
-        //   }
-        // }
+    if (!this._segment) {
+      if (endPixels > waveformData.length) {
+        endPixels = waveformData.length;
       }
-    // }
+    } else if (this._segment.type !== 'SELECTION_REGION') {
+      const segmentStartPixel = this._view.timeToPixels(this._segment.startTime);
+      if (endPixels > segmentStartPixel + waveformData.length) {
+        endPixels = segmentStartPixel + waveformData.length;
+      }
+    }
 
     var channels = waveformData.channels;
 

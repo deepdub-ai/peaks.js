@@ -246,15 +246,6 @@ define([
     return indexes;
   };
 
-  WaveformSegments.prototype.updateId = function(id, newId) {
-    const segment = this.getSegment(id);
-
-    segment._updateId(newId);
-
-    delete this._segmentsById[id];
-    this._segmentsById[newId] = segment;
-  };
-
   /**
    * Removes the segments at the given array indexes.
    *

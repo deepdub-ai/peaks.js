@@ -248,7 +248,7 @@ define([
     //     self._width = self._container.clientWidth;
     //     const options = { width: self._width }
     //     self._data = self._originalWaveformData.resample(options);
-    //     this._peaks.options.store.getState().resampleWaveforms('overview', options)
+    //     this._peaks.options.store.getState().setResampleOptions('overview', options)
     //     self._stage.setWidth(self._width);
 
     //     self._updateWaveform();
@@ -454,7 +454,7 @@ define([
 
       try {
         const options = { width: this._width }
-        this._peaks.options.store.getState().resampleWaveforms('overview', options)
+        this._peaks.options.store.getState().setResampleOptions('overview', options)
         this._data = this._originalWaveformData.resample(options);
         // updateWaveform = true;
       }

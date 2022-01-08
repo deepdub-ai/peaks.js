@@ -305,7 +305,15 @@ define([
       return null;
     }
 
-    return this._peaks.options.store.getState().getOriginalWaveformById('zoomview', this._segment.waveformId)
+    const originalWaveform = this._peaks.options.store.getState().getOriginalWaveformById('zoomview', this._segment.waveformId)
+
+    if (originalWaveform) {
+      return originalWaveform;
+    }
+
+    const silentWaveform = this._peaks.options.store.getState().getSilentWaveform();
+
+    return silentWaveform;
   };
 
   SegmentShape.prototype.fitToView = function() {

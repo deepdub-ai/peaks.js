@@ -39,16 +39,6 @@ define(['./utils', 'konva', './store'], function(Utils, Konva, store) {
 
     this.viewName = options.view.getName()
 
-    // Used to ignore calls to "stale" calls to
-    // `_sceneFunc`.
-    // Calls will become "stale" when `_sceneFunc`
-    // was called more than once without calling
-    // `_drawWaveform`. This will happen when `sceneFunc`
-    // was called but the Waveform Data was not yet available
-    // causing `sceneFunc` to await it.
-    //
-    this._sceneFuncCallId = 0;
-
     var shapeOptions = {};
 
     if (options.pattern) {
@@ -132,46 +122,30 @@ define(['./utils', 'konva', './store'], function(Utils, Konva, store) {
     var frameOffset = this._view.getFrameOffset();
     var width = this._view.getWidth();
     var height = this._view.getHeight() - segmentDetailsHeight;
-    let waveformData = this._getWaveformData();
-    this._sceneFuncCallId++;
-
-    // peaks can't handle `async`, hence this.
-    //
-    const drawWaveform = (waveformData) => {
-      this._drawWaveform(
-        context,
-        waveformData,
-        Math.round(frameOffset),
-        Math.round(this._segment ? this._view.timeToPixels(this._segment.startTime) : frameOffset),
-        Math.floor(this._segment ? this._view.timeToPixels(this._segment.endTime)   : frameOffset + width),
-        width,
-        height,
-        segmentDetailsHeight
-      );
-    }
+    let waveformData = this._getWaveformData()
 
     if (!waveformData) {
       if (this.viewName === 'overview') {
-        return;
+        return
       }
 
-      const sceneFuncCallId = this._sceneFuncCallId;
-      const frameOffset = this._view.getFrameOffset();
-
-      const originalWaveformData = this._peaks.options.store.getState().getOriginalWaveformById('zoomview', this._segment.waveformId)
-      if (originalWaveformData) {
-        drawWaveform(originalWaveformData);
-      }
-
-      this._getWaveformData({ async: true }).then(waveformData => {
-        if (!waveformData || sceneFuncCallId !== this._sceneFuncCallId || frameOffset !== this._view.getFrameOffset()) {
-          return;
-        }
-        drawWaveform(waveformData)
-      })
-    } else {
-      drawWaveform(waveformData)
+      waveformData = this._peaks.options.store.getState().getOriginalWaveformById('zoomview', this._segment.waveformId)
     }
+
+    if (!waveformData) {
+      return
+    }
+
+    this._drawWaveform(
+      context,
+      waveformData,
+      Math.round(frameOffset),
+      Math.round(this._segment ? this._view.timeToPixels(this._segment.startTime) : frameOffset),
+      Math.floor(this._segment ? this._view.timeToPixels(this._segment.endTime)   : frameOffset + width),
+      width,
+      height,
+      segmentDetailsHeight
+    );
   };
 
   /**

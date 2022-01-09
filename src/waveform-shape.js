@@ -122,6 +122,19 @@ define(['./utils', 'konva', './store'], function(Utils, Konva, store) {
     var frameOffset = this._view.getFrameOffset();
     var width = this._view.getWidth();
     var height = this._view.getHeight() - segmentDetailsHeight;
+    const startPixels = Math.round(this._segment ? this._view.timeToPixels(this._segment.startTime) : frameOffset);
+    const endPixels = Math.floor(this._segment ? this._view.timeToPixels(this._segment.endTime)   : frameOffset + width);
+
+    // FIXME(generation) This guard was added when I found that on initial load
+    // all WEVEFORM_SECTION segments were loaded, even though they were not yet
+    // visible.
+    //
+    // This obviously cannot stay here.
+    //
+    if (startPixels >= endPixels - 1) {
+      return;
+    }
+
     let waveformData = this._getWaveformData()
 
     if (!waveformData) {
@@ -132,8 +145,8 @@ define(['./utils', 'konva', './store'], function(Utils, Konva, store) {
       context,
       waveformData,
       Math.round(frameOffset),
-      Math.round(this._segment ? this._view.timeToPixels(this._segment.startTime) : frameOffset),
-      Math.floor(this._segment ? this._view.timeToPixels(this._segment.endTime)   : frameOffset + width),
+      startPixels,
+      endPixels,
       width,
       height,
       segmentDetailsHeight

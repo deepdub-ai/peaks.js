@@ -295,9 +295,9 @@ define([
   SegmentShape.prototype.getWaveformData = function() {
     const view = this._view.getName()
 
-    const waveform = this._peaks.options.store.getState().getWaveformById(view, this._segment.waveformId)
+    const waveform = this._peaks.options.store.getState().getWaveformById(view, this._segment.waveformId, this._segment.id)
 
-    if (waveform) {
+    if (waveform && waveform.data) {
       return waveform.data;
     }
 

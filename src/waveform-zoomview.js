@@ -199,7 +199,7 @@ define([
         // window.onPeaksMouseDown.bind(this)(mousePosX, event);
       },
 
-      onMouseMove: function (eventType, mousePosX, event) {
+      onMouseMove: function (eventType, mousePosX, _, event) {
         if (event.button === 2) {
           return
         }
@@ -396,6 +396,7 @@ define([
             var newFrameOffset = Utils.clamp(self._frameOffset + delta * MOUSE_DELTA_MULTIPLIER, 0, self._pixelLength - self._width);
 
           self._updateWaveform(newFrameOffset, 'wheel');
+          self._peaks.emit("zoomview.scroll", newFrameOffset);
         }
       },
     });
@@ -608,7 +609,7 @@ define([
     );
   }
 
-  WaveformZoomView.prototype.setZoom = function (options) {
+  WaveformZoomView.prototype.setZoom = function (options, cause) {
     var scale;
 
     if (isAutoScale(options)) {
@@ -665,11 +666,15 @@ define([
 
     this._resampleData({ scale: scale });
 
+    if (cause === 'enter-view') {
+      return
+    }
+
     var apexPixel = this.timeToPixels(apexTime);
 
     this._frameOffset = apexPixel - playheadOffsetPixels;
 
-    this._updateWaveform(this._frameOffset, 'zoom');
+    this._updateWaveform(this._frameOffset, cause || 'zoom');
 
     this._playheadLayer.zoomLevelChanged();
 
@@ -680,7 +685,7 @@ define([
 
     // adapter.start(relativePosition);
 
-    this._peaks.emit("zoom.update", scale, prevScale);
+    this._peaks.emit("zoom.update", scale, prevScale, cause);
 
     return true;
   };
@@ -781,6 +786,10 @@ define([
 
   WaveformZoomView.prototype.getFrameOffset = function () {
     return this._frameOffset;
+  };
+
+  WaveformZoomView.prototype.setFrameOffset = function (frameOffset) {
+    this._updateWaveform(frameOffset, 'explicit-set-frame-offset');
   };
 
   /**
@@ -906,7 +915,7 @@ define([
     this._pointsLayer.updatePoints(frameStartTime, frameEndTime);
     this._segmentsLayer.updateSegments(frameStartTime, frameEndTime);
 
-    this._peaks.emit("zoomview.displaying", frameStartTime, frameEndTime, cause);
+    this._peaks.emit("zoomview.displaying", frameStartTime, frameEndTime, this._frameOffset, cause);
   };
 
   WaveformZoomView.prototype.setWaveformColor = function (color) {
@@ -980,7 +989,7 @@ define([
     this._pointsLayer.fitToView();
 
     if (updateWaveform) {
-      this._updateWaveform(this._frameOffset);
+      this._updateWaveform(this._frameOffset, 'fit-to-container');
     }
 
     this._stage.draw();

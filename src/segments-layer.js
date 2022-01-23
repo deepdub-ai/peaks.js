@@ -168,7 +168,9 @@ define([
   SegmentsLayer.prototype._addSegmentShape = function(segment) {
     var segmentShape = this._createSegmentShape(segment);
 
-    segmentShape.addToLayer(this._layer);
+    if (this._view.getName() !== 'overview') {
+      segmentShape.addToLayer(this._layer);
+    }
 
     this._segmentShapes[segment.id] = segmentShape;
 

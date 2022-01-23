@@ -132,7 +132,10 @@ define([
 
     this._playheadLayer.updatePlayheadTime(time);
 
-    self._onMouseDownAndMouseMove = (mousePosX) => {
+    var highlightMouseDownOffset = 0;
+    self._onMouseDownAndMouseMove = (mousePosX, mousePosY) => {
+      self._highlightLayer.setHighlightY(mousePosY - highlightMouseDownOffset);
+
       if (self._isCtrlSeeking || self._options.overviewSeeksZoomview) {
         mousePosX = Utils.clamp(mousePosX, 0, self._width);
 
@@ -166,14 +169,18 @@ define([
     }
 
     self._mouseDragHandler = new MouseDragHandler(self._stage, {
-      onMouseDown: function(mousePosX, _, event) {
+      onMouseDown: function(mousePosX, mousePosY, event) {
         self._isSeeking = true;
         self._isCtrlSeeking = event.evt.ctrlKey;
-        self._onMouseDownAndMouseMove(mousePosX);
+        var highlightBounds = self._highlightLayer.getBounds()
+        var yOffset = mousePosY - highlightBounds.y
+        highlightMouseDownOffset = Utils.clamp(yOffset, 0, highlightBounds.height);
+        // var yOffset = highlightBounds.y >= mousePosY && highlightBounds.y + highlightBounds.height >= mousePosY;
+        self._onMouseDownAndMouseMove(mousePosX, mousePosY);
       },
 
-      onMouseMove: function(eventType, mousePosX) {
-        self._onMouseDownAndMouseMove(mousePosX);
+      onMouseMove: function(eventType, mousePosX, mousePosY) {
+        self._onMouseDownAndMouseMove(mousePosX, mousePosY);
       },
 
       onMouseUp: function() {
@@ -197,6 +204,17 @@ define([
     return 'overview';
   };
 
+  WaveformOverview.prototype.update = function(startTime, endTime) {
+    if (startTime === this._startTime && endTime === this._endTime) {
+      return
+    }
+
+    this._startTime = startTime;
+    this._endTime = endTime;
+
+    this._onZoomviewDisplaying(startTime, endTime)
+  };
+
   WaveformOverview.prototype._onTimeUpdate = function(time) {
     this._playheadLayer.updatePlayheadTime(time);
   };
@@ -215,6 +233,10 @@ define([
 
   WaveformOverview.prototype.showHighlight = function(startTime, endTime) {
     this._highlightLayer.showHighlight(startTime, endTime);
+  };
+
+  WaveformOverview.prototype.setHighlightBounds = function(y, height) {
+    this._highlightLayer.setHighlightBounds(y, height)
   };
 
   WaveformOverview.prototype._onWindowResize = function() {
@@ -387,7 +409,8 @@ define([
       axisLabelColor:      this._options.axisLabelColor,
       axisLabelFontFamily: this._options.fontFamily,
       axisLabelFontSize:   this._options.fontSize,
-      axisLabelFontStyle:  this._options.fontStyle
+      axisLabelFontStyle:  this._options.fontStyle,
+      axisHideTop:         true,
     });
 
     this._axis.addToLayer(this._axisLayer);

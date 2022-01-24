@@ -514,6 +514,10 @@ define([
     this._playheadLayer.setPlayheadLineColor(color)
   }
 
+  WaveformOverview.prototype.getHighlightBounds = function() {
+    return this._highlightLayer.getHighlightBounds()
+  }
+
   WaveformOverview.prototype.destroy = function() {
     if (this._resizeTimeoutId) {
       clearTimeout(this._resizeTimeoutId);

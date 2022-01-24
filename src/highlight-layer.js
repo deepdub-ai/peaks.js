@@ -63,21 +63,19 @@ define([
     this._layer.draw();
   };
 
+  HighlightLayer.prototype.getHighlightBounds = function() {
+    return {
+      yPct: this._yPct,
+      heightPct: this._heightPct,
+    }
+  };
+
   HighlightLayer.prototype.setHighlightY = function(y) {
     y = Utils.clamp(y, 0, this._view.getHeight() - this._highlightRect.height());
 
     this._highlightRect.setAttrs({ y: y })
 
     this._layer.draw();
-  };
-
-  HighlightLayer.prototype.getYAxis = function() {
-    const height = this._highlightRect.height();
-
-    return {
-      y: this._highlightRect.y() / (this._view.getHeight() - height),
-      height: height / this._view.getHeight(),
-    }
   };
 
   HighlightLayer.prototype.getBounds = function() {

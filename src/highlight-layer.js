@@ -64,9 +64,11 @@ define([
   };
 
   HighlightLayer.prototype.getHighlightBounds = function() {
+    const height = this._highlightRect.height();
+
     return {
-      yPct: this._yPct,
-      heightPct: this._heightPct,
+      yPct: this._highlightRect.y() / (this._view.getHeight() - height),
+      heightPct: height / this._view.getHeight(),
     }
   };
 

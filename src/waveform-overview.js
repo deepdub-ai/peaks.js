@@ -174,7 +174,12 @@ define([
         self._isCtrlSeeking = event.evt.ctrlKey;
         var highlightBounds = self._highlightLayer.getBounds()
         var yOffset = mousePosY - highlightBounds.y
-        highlightMouseDownOffset = Utils.clamp(yOffset, 0, highlightBounds.height);
+        const clampedHighlightMouseDownOffset = Utils.clamp(yOffset, 0, highlightBounds.height);
+        if (yOffset !== clampedHighlightMouseDownOffset) {
+          highlightMouseDownOffset = highlightBounds.height / 2;
+        } else {
+          highlightMouseDownOffset = yOffset
+        }
         // var yOffset = highlightBounds.y >= mousePosY && highlightBounds.y + highlightBounds.height >= mousePosY;
         self._onMouseDownAndMouseMove(mousePosX, mousePosY);
       },

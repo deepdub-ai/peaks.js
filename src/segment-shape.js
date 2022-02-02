@@ -234,8 +234,8 @@ define([
     this._peaks.emit('segments.mouseleave', this._segment);
   };
 
-  SegmentShape.prototype._onClick = function() {
-    this._peaks.emit('segments.click', this._segment);
+  SegmentShape.prototype._onClick = function(e) {
+    this._peaks.emit('segments.click', this._segment, e.evt);
   };
 
   /**

@@ -718,7 +718,7 @@ define([
     return this.pixelsToTime(this._frameOffset + this._width);
   };
 
-  WaveformZoomView.prototype.setStartTime = function (time) {
+  WaveformZoomView.prototype.setStartTime = function (time, cuase) {
     if (time < 0) {
       time = 0;
     }
@@ -727,7 +727,7 @@ define([
       time = 0;
     }
 
-    this._updateWaveform(this.timeToPixels(time));
+    this._updateWaveform(this.timeToPixels(time), cuase || 'set-start-time');
   };
 
   WaveformZoomView.prototype.repaint = function () {

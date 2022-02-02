@@ -497,6 +497,9 @@ define([
       }
 
       this._resizeTimeoutId = setTimeout(() => {
+        if (this._originalWaveformData.duration === 0) {
+          return
+        }
         this._data = this._originalWaveformData.resample({ width: this._width });
         this._updateWaveform();
         this._resizeTimeoutId = null;

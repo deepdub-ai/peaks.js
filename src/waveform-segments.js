@@ -319,6 +319,12 @@ define([
     });
   };
 
+  WaveformSegments.prototype.removeByIds = function(segmentIds) {
+    return this._removeSegments(function(segment) {
+      return segmentIds.includes(segment.id);
+    });
+  };
+
   /**
    * Removes any segments with the given id.
    *

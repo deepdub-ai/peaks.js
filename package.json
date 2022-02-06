@@ -1,6 +1,6 @@
 {
   "name": "@notdutzi/peaks.js",
-  "version": "1.2.0-beta.16",
+  "version": "1.2.0-beta.17",
   "description": "JavaScript UI component for displaying audio waveforms",
   "main": "./peaks.js",
   "files": [
@@ -36,7 +36,7 @@
     "prebuild": "npm run lint",
     "build": "browserify -d -e ./src/main.js -t deamdify -s peaks | exorcist peaks.js.map | derequire - > peaks.js",
     "build:watch": "watchify -d -e ./src/main.js -t deamdify -s peaks -o ./demo/peaks.js",
-    "build:watch-deepdub": "watchify -d -e ./src/main.js -t deamdify -s peaks -o ../deepdubapp-dev/node_modules/@notdutzi/peaks.js/peaks.js",
+    "build:watch-deepdub": "watchify -d -e ./src/main.js -t deamdify -s peaks -o ../deepdubapp/node_modules/@notdutzi/peaks.js/peaks.js",
     "postbuild": "copyfiles peaks.js peaks.js.map demo",
     "doc": "jsdoc --private --destination docs --recurse src",
     "lint": "eslint src/*.js test/**/*.js test/*.js karma.conf.js",

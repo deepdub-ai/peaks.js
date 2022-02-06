@@ -160,6 +160,8 @@ define([
       mouseDownZoom: 0,
       initMousePosX: 0,
       preventContextMenu: true,
+      padding: 0,
+      containerBounds: null,
 
       onMouseDown: function (mousePosX, mousePosY, event) {
         store.getStore().setState({ isDragging: true });
@@ -186,7 +188,14 @@ define([
 
         self._peaks.emit("zoomview.mousedown", time, event);
 
-        this.pointerLockTarget = event.evt.target;
+        this.pointerLockTarget = event.evt.currentTarget;
+        this.containerBounds = event.evt.currentTarget.getBoundingClientRect();
+        this.padding = 100;
+        if (mousePosX < 100) {
+          this.padding = mousePosX - 10;
+        } else if (this.containerBounds.width - mousePosX < 100) {
+          this.padding = this.containerBounds.width - mousePosX - 10;
+        }
         // TODO[epic="generation"] do we really need setPointerCapture?
         //
         // this.pointerLockTarget = event.evt.target.closest('[data-main-track]');
@@ -236,23 +245,23 @@ define([
           return self.pixelsToTime(pixelIndex);
         };
 
-        const layerX = event.layerX
-        const movementX = event.movementX
-        const rightDistance = this.pointerLockTarget.getBoundingClientRect().width - layerX
+        const mouseX = event.clientX - this.containerBounds.left;
+        const movementX = event.movementX / window.devicePixelRatio
+        const rightDistance = this.pointerLockTarget.getBoundingClientRect().width - mouseX
         if (this.isLocked && ((!this.isPanningLeft && movementX < 0) || (this.isPanningLeft && movementX > 0))) {
           document.exitPointerLock()
           // this.pointerLockTarget.setPointerCapture(1);
           this.isLocked = false;
-        } else if (!this.isLocked && ((movementX < 0 && layerX <= 100) || (movementX > 0 && rightDistance <= 100))) {
-          this.pointerLockTarget.requestPointerLock().catch(() => { });
+        } else if (!this.isLocked && ((movementX < 0 && mouseX <= this.padding) || (movementX > 0 && rightDistance <= this.padding))) {
+          this.pointerLockTarget.requestPointerLock().catch(() => {});
           this.isLocked = true;
-          this.isPanningLeft = layerX <= 100;
+          this.isPanningLeft = mouseX <= this.padding;
         }
 
         const calculateOffset = () => {
           const mousePos = this.totalMovementX + this.initMousePosX;
           const width = self._width;
-          const padding = 100;
+          const padding = this.padding;
           const absMousePos = mousePos + this.initialFrameOffset;
           let offset = 0;
           if (absMousePos < self._frameOffset + padding) {
@@ -276,7 +285,7 @@ define([
         };
 
         if (eventType !== "touchmove") {
-          this.totalMovementX += event.movementX;
+          this.totalMovementX += event.movementX / window.devicePixelRatio;
           const time = calculateTime();
 
           // This is a temporary fix for the issue where if the user scrolls
@@ -284,7 +293,7 @@ define([
           // right to start dragging the segment.
           //
           if (time < 0) {
-            this.totalMovementX -= event.movementX;
+            this.totalMovementX -= event.movementX / window.devicePixelRatio;
           }
 
           self._peaks.emit("zoomview.drag", time, event);

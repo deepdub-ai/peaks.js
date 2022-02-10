@@ -290,33 +290,26 @@ define(function() {
       return Object.prototype.hasOwnProperty.call(object, field);
     },
 
-    // Users with both a mouse and a track show the scroll bars,
-    // thus this method detects them as mouse users.
-    //
-    // FIXME Find a better solution.
-    //
     detectPointingDevice: function() {
-      return 'trackpad'
+      const scrollEl = document.createElement('div');
+      const childEl = document.createElement('div');
 
-      // const scrollEl = document.createElement('div');
-      // const childEl = document.createElement('div');
+      scrollEl.style.width = '1px';
+      scrollEl.style.height = '1px';
+      scrollEl.style.overflow = 'auto';
+      scrollEl.style.position = 'fixed';
+      scrollEl.style.visibility = 'hidden';
+      childEl.style.height = '2px';
 
-      // scrollEl.style.width = '1px';
-      // scrollEl.style.height = '1px';
-      // scrollEl.style.overflow = 'auto';
-      // scrollEl.style.position = 'fixed';
-      // scrollEl.style.visibility = 'hidden';
-      // childEl.style.height = '2px';
+      scrollEl.appendChild(childEl);
+      document.body.appendChild(scrollEl);
 
-      // scrollEl.appendChild(childEl);
-      // document.body.appendChild(scrollEl);
+      const scrollbarWidth = scrollEl.offsetWidth - scrollEl.clientWidth;
+      const controlDevice = scrollbarWidth ? 'mouse' : 'trackpad';
 
-      // const scrollbarWidth = scrollEl.offsetWidth - scrollEl.clientWidth;
-      // const controlDevice = scrollbarWidth ? 'mouse' : 'trackpad';
+      scrollEl.remove();
 
-      // scrollEl.remove();
-
-      // return controlDevice;
+      return controlDevice;
     }
   };
 });

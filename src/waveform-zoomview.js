@@ -600,6 +600,10 @@ define([
     }
   };
 
+  WaveformZoomView.prototype.syncPlayhead = function (time) {
+    this._syncPlayhead(time)
+  },
+
   /**
    * Changes the zoom level.
    *

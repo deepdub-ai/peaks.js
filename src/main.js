@@ -648,6 +648,10 @@ define([
     this.options.fps = fps;
   };
 
+  Peaks.prototype.getWaveformData = function() {
+    return this._waveformData;
+  };
+
   /**
    * Cleans up a Peaks instance after use.
    */

@@ -52,6 +52,7 @@ define([
     self._onPause = self._onPause.bind(this);
     self._onZoomviewDisplaying = self._onZoomviewDisplaying.bind(this);
     self._onWindowResize = self._onWindowResize.bind(this);
+    self.getWaveformData = self.getWaveformData.bind(this);
 
     // Register event handlers
     peaks.on('player.timeupdate', self._onTimeUpdate);

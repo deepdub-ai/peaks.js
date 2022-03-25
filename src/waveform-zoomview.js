@@ -438,6 +438,14 @@ define([
       return;
     }
 
+    const currentTime = this._peaks.player.getCurrentTime();
+    if (currentTime === this._prevCurrentTime) {
+      window.requestAnimationFrame(this._updateTime);
+      return;
+    }
+
+    this._prevCurrentTime = currentTime;
+
     const now = performance.now();
 
     const isPlaying = this._peaks.player.isPlaying();
@@ -461,14 +469,6 @@ define([
       );
       return;
     }
-
-    const currentTime = this._peaks.player.getCurrentTime();
-    if (currentTime === this._prevCurrentTime) {
-      window.requestAnimationFrame(this._updateTime);
-      return;
-    }
-
-    this._prevCurrentTime = currentTime;
 
     if (
       isSeeking ||

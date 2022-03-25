@@ -403,6 +403,10 @@ define([
       peaks: this._peaks,
     });
 
+    if (this._options.hideOverviewWaveform) {
+      return
+    }
+
     this._waveformLayer.add(this._waveformShape);
     this._stage.add(this._waveformLayer);
   };

@@ -100,7 +100,7 @@ define([
     var limit;
 
     const slowDownFactor = this.isAltKeyDownWhenMouseDown ? 1 / 10 : 1
-    let posX = (pos.x - this.initDragTargetX) * slowDownFactor + this.initDragTargetX
+    let posX = (pos.x - (this.initDragTargetX || 0)) * slowDownFactor + (this.initDragTargetX || 0)
 
     if (this._startMarker) {
       marker = this._segmentShape.getEndMarker();

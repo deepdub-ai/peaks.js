@@ -99,8 +99,9 @@ define(["konva"], function (Konva) {
 
     if (this._handlers.onMouseDown) {
       var mouseDownPosX = this._getMousePosX(this._mouseDownClientX);
+      var mouseDownPosY = this._getMousePosY(event.evt.clientY);
 
-      this._handlers.onMouseDown(mouseDownPosX, event);
+      this._handlers.onMouseDown(mouseDownPosX, mouseDownPosY, event);
     }
 
     // Use the window mousemove and mouseup handlers instead of the
@@ -132,29 +133,33 @@ define(["konva"], function (Konva) {
 
   MouseDragHandler.prototype._mouseMove = function (event) {
     var clientX = null;
+    var clientY = null;
 
     if (event.type === "touchmove") {
       clientX = Math.floor(event.changedTouches[0].clientX);
+      clientY = Math.floor(event.changedTouches[0].clientY);
     } else {
       clientX = event.clientX;
+      clientY = event.clientY;
     }
 
     // Don't update on vertical mouse movement.
-    if (clientX === this._mouseDownClientX) {
-      return;
-    }
+    // if (clientX === this._mouseDownClientX) {
+    //   return;
+    // }
 
     this._dragging = true;
 
     if (this._handlers.onMouseMove) {
       var mousePosX = this._getMousePosX(clientX);
+      var mousePosY = this._getMousePosY(clientY);
 
       // FIXME this might cause an issue?
       // This line was in the base, while the uncommented line appears in the
       // fork branch.
       //
       // this._handlers.onMouseMove(mousePosX);
-      this._handlers.onMouseMove(event.type, mousePosX, event);
+      this._handlers.onMouseMove(event.type, mousePosX, mousePosY, event);
     }
   };
 

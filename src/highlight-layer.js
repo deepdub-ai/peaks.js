@@ -48,6 +48,47 @@ define([
     this._update(startTime, endTime);
   };
 
+  HighlightLayer.prototype.setHighlightBounds = function(yPct, heightPct) {
+    const newHeight = heightPct * this._view.getHeight()
+    const newY = yPct * (this._view.getHeight() - newHeight);
+
+    this._yPct = yPct;
+    this._heightPct = heightPct;
+
+    this._highlightRect.setAttrs({
+      y:      newY,
+      height: newHeight
+    });
+
+    this._layer.draw();
+  };
+
+  HighlightLayer.prototype.getHighlightBounds = function() {
+    const height = this._highlightRect.height();
+
+    return {
+      yPct: this._highlightRect.y() / (this._view.getHeight() - height),
+      heightPct: height / this._view.getHeight(),
+    }
+  };
+
+  HighlightLayer.prototype.setHighlightY = function(y) {
+    y = Utils.clamp(y, 0, this._view.getHeight() - this._highlightRect.height());
+
+    this._highlightRect.setAttrs({ y: y })
+
+    this._layer.draw();
+  };
+
+  HighlightLayer.prototype.getBounds = function() {
+    return {
+      x: this._highlightRect.x(),
+      y: this._highlightRect.y(),
+      width: this._highlightRect.width(),
+      height: this._highlightRect.height(),
+    }
+  };
+
   /**
    * Updates the position of the highlight region.
    *
@@ -115,13 +156,7 @@ define([
 
   HighlightLayer.prototype.fitToView = function() {
     if (this._highlightRect) {
-      var height = this._view.getHeight();
-      var offset = Utils.clamp(this._offset, 0, Math.floor(height / 2));
-
-      this._highlightRect.setAttrs({
-        y: offset,
-        height: height - (offset * 2)
-      });
+      this.setHighlightBounds(this._yPct, this._heightPct);
     }
   };
 

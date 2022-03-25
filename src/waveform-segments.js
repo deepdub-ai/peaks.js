@@ -319,9 +319,15 @@ define([
     });
   };
 
+  WaveformSegments.prototype.removeByIds = function(segmentIds) {
+    return this._removeSegments(function(segment) {
+      return segmentIds.includes(segment.id);
+    });
+  };
+
   /**
    * Removes any segments with the given id.
-   * 
+   *
    * This method first hides it, the defers that segment's removal.
    *
    * @param {String} id
@@ -329,7 +335,7 @@ define([
 
   WaveformSegments.prototype.deferRemoveById = function(segmentId) {
     this._peaks.emit('segments.hide', [this._segmentsById[segmentId]])
-    
+
     setTimeout(() => {
       this._removeSegments(function(segment) {
         return segment.id === segmentId;

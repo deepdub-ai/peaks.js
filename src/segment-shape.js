@@ -44,12 +44,17 @@ define([
     this._color         = segment.color;
     this._showWaveform  = !segment.hideWaveform;
 
+    this.getWaveformData = this.getWaveformData.bind(this);
+
     if (this._showWaveform) {
       this._waveformShape = new WaveformShape({
         color:   segment.color,
         pattern: segment.pattern,
         view:    view,
         segment: segment,
+        getWaveformData: segment.waveformId ? this.getWaveformData : undefined,
+        paddingTop: this._paddingTop,
+        peaks:   peaks,
       });
     }
 
@@ -229,8 +234,8 @@ define([
     this._peaks.emit('segments.mouseleave', this._segment);
   };
 
-  SegmentShape.prototype._onClick = function() {
-    this._peaks.emit('segments.click', this._segment);
+  SegmentShape.prototype._onClick = function(e) {
+    this._peaks.emit('segments.click', this._segment, e.evt);
   };
 
   /**
@@ -285,6 +290,30 @@ define([
     var startMarker = segmentMarker.isStartMarker();
 
     this._peaks.emit('segments.dragend', this._segment, startMarker);
+  };
+
+  SegmentShape.prototype.getWaveformData = function() {
+    const view = this._view.getName()
+
+    const waveform = this._peaks.options.store.getState().getWaveformById(view, this._segment.waveformId, this._segment.id)
+
+    if (waveform && waveform.data) {
+      return waveform.data;
+    }
+
+    if (this.viewName === 'overview') {
+      return null;
+    }
+
+    const originalWaveform = this._peaks.options.store.getState().getOriginalWaveformById('zoomview', this._segment.waveformId)
+
+    if (originalWaveform) {
+      return originalWaveform;
+    }
+
+    const silentWaveform = this._peaks.options.store.getState().getSilentWaveform();
+
+    return silentWaveform;
   };
 
   SegmentShape.prototype.fitToView = function() {

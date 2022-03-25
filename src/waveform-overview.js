@@ -52,6 +52,7 @@ define([
     self._onPause = self._onPause.bind(this);
     self._onZoomviewDisplaying = self._onZoomviewDisplaying.bind(this);
     self._onWindowResize = self._onWindowResize.bind(this);
+    self.getWaveformData = self.getWaveformData.bind(this);
 
     // Register event handlers
     peaks.on('player.timeupdate', self._onTimeUpdate);
@@ -132,7 +133,10 @@ define([
 
     this._playheadLayer.updatePlayheadTime(time);
 
-    self._onMouseDownAndMouseMove = (mousePosX) => {
+    var highlightMouseDownOffset = 0;
+    self._onMouseDownAndMouseMove = (mousePosX, mousePosY) => {
+      self._highlightLayer.setHighlightY(mousePosY - highlightMouseDownOffset);
+
       if (self._isCtrlSeeking || self._options.overviewSeeksZoomview) {
         mousePosX = Utils.clamp(mousePosX, 0, self._width);
 
@@ -153,7 +157,7 @@ define([
         self._playheadLayer.updatePlayheadTime(time);
 
         self._peaks.player.seek(time);
-        self._peaks.views.getView('zoomview')._syncPlayhead(timeCentered, { exact: true, playheadTime: time });
+        self._peaks.views.getView('zoomview')._syncPlayhead(timeCentered, { exact: true, playheadTime: time, cause: 'overview-drag-scroll' });
       } else {
         let time = self.pixelsToTime(mousePosX - self._highlightLayer._width / 2);
         const duration = self._getDuration();
@@ -161,19 +165,28 @@ define([
         if (time > duration) {
           time = duration;
         }
-        self._peaks.views.getView('zoomview')._syncPlayhead(time, { exact: true, persistPlayhead: true });
+        self._peaks.views.getView('zoomview')._syncPlayhead(time, { exact: true, persistPlayhead: true, cause: 'overview-drag-scroll' });
       }
     }
 
     self._mouseDragHandler = new MouseDragHandler(self._stage, {
-      onMouseDown: function(mousePosX, event) {
+      onMouseDown: function(mousePosX, mousePosY, event) {
         self._isSeeking = true;
         self._isCtrlSeeking = event.evt.ctrlKey;
-        self._onMouseDownAndMouseMove(mousePosX);
+        var highlightBounds = self._highlightLayer.getBounds()
+        var yOffset = mousePosY - highlightBounds.y
+        const clampedHighlightMouseDownOffset = Utils.clamp(yOffset, 0, highlightBounds.height);
+        if (yOffset !== clampedHighlightMouseDownOffset) {
+          highlightMouseDownOffset = highlightBounds.height / 2;
+        } else {
+          highlightMouseDownOffset = yOffset
+        }
+        // var yOffset = highlightBounds.y >= mousePosY && highlightBounds.y + highlightBounds.height >= mousePosY;
+        self._onMouseDownAndMouseMove(mousePosX, mousePosY);
       },
 
-      onMouseMove: function(eventType, mousePosX) {
-        self._onMouseDownAndMouseMove(mousePosX);
+      onMouseMove: function(eventType, mousePosX, mousePosY) {
+        self._onMouseDownAndMouseMove(mousePosX, mousePosY);
       },
 
       onMouseUp: function() {
@@ -197,6 +210,17 @@ define([
     return 'overview';
   };
 
+  WaveformOverview.prototype.update = function(startTime, endTime) {
+    if (startTime === this._startTime && endTime === this._endTime) {
+      return
+    }
+
+    this._startTime = startTime;
+    this._endTime = endTime;
+
+    this._onZoomviewDisplaying(startTime, endTime)
+  };
+
   WaveformOverview.prototype._onTimeUpdate = function(time) {
     this._playheadLayer.updatePlayheadTime(time);
   };
@@ -217,7 +241,47 @@ define([
     this._highlightLayer.showHighlight(startTime, endTime);
   };
 
+  WaveformOverview.prototype.setHighlightBounds = function(y, height) {
+    this._highlightLayer.setHighlightBounds(y, height)
+  };
+
   WaveformOverview.prototype._onWindowResize = function() {
+    //
+    // After merge changes from SEGMENTS PANELS, it seems like the following
+    // commented-out block of code is no longer needed.
+    //
+    // Note that I made changes to this commented-out block in the GENEDIT
+    // branch.
+    //
+    // TODO So just make sure resizing the window still works as expected.
+    //
+
+    // var self = this;
+
+    // if (self._resizeTimeoutId) {
+    //   clearTimeout(self._resizeTimeoutId);
+    //   self._resizeTimeoutId = null;
+    // }
+
+    // // Avoid resampling waveform data to zero width
+    // if (self._container.clientWidth !== 0) {
+    //   self._width = self._container.clientWidth;
+    //   self._stage.setWidth(self._width);
+
+    //   self._resizeTimeoutId = setTimeout(function() {
+    //     if (self._originalWaveformData.duration === 0) {
+    //       return
+    //     }
+
+    //     self._width = self._container.clientWidth;
+    //     const options = { width: self._width }
+    //     self._data = self._originalWaveformData.resample(options);
+    //     this._peaks.options.store.getState().setResampleOptions('overview', options)
+    //     self._stage.setWidth(self._width);
+
+    //     self._updateWaveform();
+    //   }, 500);
+    // }
     this.fitToContainer();
   };
 
@@ -242,6 +306,10 @@ define([
    */
 
   WaveformOverview.prototype.timeToPixels = function(time) {
+    if (this._peaks.options.silence) {
+      return Math.floor(time / this._peaks.options.silence.duration * this.getWidth())
+    }
+
     return Math.floor(time * this._data.sample_rate / this._data.scale);
   };
 
@@ -253,6 +321,10 @@ define([
    */
 
   WaveformOverview.prototype.pixelsToTime = function(pixels) {
+    if (this._peaks.options.silence) {
+      return pixels / this.getWidth() * this._peaks.options.silence.duration;
+    }
+
     return pixels * this._data.scale / this._data.sample_rate;
   };
 
@@ -327,7 +399,8 @@ define([
   WaveformOverview.prototype._createWaveform = function() {
     this._waveformShape = new WaveformShape({
       color: this._options.overviewWaveformColor,
-      view: this
+      view: this,
+      peaks: this._peaks,
     });
 
     this._waveformLayer.add(this._waveformShape);
@@ -342,7 +415,8 @@ define([
       axisLabelColor:      this._options.axisLabelColor,
       axisLabelFontFamily: this._options.fontFamily,
       axisLabelFontSize:   this._options.fontSize,
-      axisLabelFontStyle:  this._options.fontStyle
+      axisLabelFontStyle:  this._options.fontStyle,
+      axisHideTop:         true,
     });
 
     this._axis.addToLayer(this._axisLayer);
@@ -407,11 +481,26 @@ define([
       this._width = this._container.clientWidth;
       this._stage.setWidth(this._width);
 
-      if (this._resizeTimeoutId) {
-        clearTimeout(this._resizeTimeoutId);
+      try {
+        const options = { width: this._width }
+        this._peaks.options.store.getState().setResampleOptions('overview', options)
+        this._data = this._originalWaveformData.resample(options);
+        // updateWaveform = true;
+      }
+      catch (error) {
+        // Ignore, and leave this._data as it was
+        // The following 2 lines of code were in SEGMENTS PANELS branch.
+        //
+        // TODO Make sure commenting them out doesn't break stuff.
+        //
+        // if (this._resizeTimeoutId) {
+        //   clearTimeout(this._resizeTimeoutId);
       }
 
       this._resizeTimeoutId = setTimeout(() => {
+        if (this._originalWaveformData.duration === 0) {
+          return
+        }
         this._data = this._originalWaveformData.resample({ width: this._width });
         this._updateWaveform();
         this._resizeTimeoutId = null;
@@ -432,6 +521,10 @@ define([
 
   WaveformOverview.prototype.setPlayheadLineColor = function(color) {
     this._playheadLayer.setPlayheadLineColor(color)
+  }
+
+  WaveformOverview.prototype.getHighlightBounds = function() {
+    return this._highlightLayer.getHighlightBounds()
   }
 
   WaveformOverview.prototype.destroy = function() {

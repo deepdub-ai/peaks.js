@@ -35,6 +35,9 @@ define(['./utils', 'konva', './store'], function(Utils, Konva, store) {
     this._color = options.color;
     this._type = options.type || 'playback';
     this._pattern = options.pattern;
+    this._peaks = options.peaks;
+
+    this.viewName = options.view.getName()
 
     var shapeOptions = {};
 
@@ -66,6 +69,7 @@ define(['./utils', 'konva', './store'], function(Utils, Konva, store) {
 
     this._view = options.view;
     this._segment = options.segment;
+    this._getWaveformData = options.getWaveformData || options.view.getWaveformData;
 
     this.sceneFunc(this._sceneFunc);
 
@@ -118,13 +122,31 @@ define(['./utils', 'konva', './store'], function(Utils, Konva, store) {
     var frameOffset = this._view.getFrameOffset();
     var width = this._view.getWidth();
     var height = this._view.getHeight() - segmentDetailsHeight;
+    const startPixels = Math.round(this._segment ? this._view.timeToPixels(this._segment.startTime) : frameOffset);
+    const endPixels = Math.floor(this._segment ? this._view.timeToPixels(this._segment.endTime)   : frameOffset + width);
+
+    // FIXME(generation) This guard was added when I found that on initial load
+    // all WEVEFORM_SECTION segments were loaded, even though they were not yet
+    // visible.
+    //
+    // This obviously cannot stay here.
+    //
+    if (startPixels >= endPixels - 1) {
+      return;
+    }
+
+    let waveformData = this._getWaveformData()
+
+    if (!waveformData) {
+      return
+    }
 
     this._drawWaveform(
       context,
-      this._view.getWaveformData(),
+      waveformData,
       Math.round(frameOffset),
-      Math.round(this._segment ? this._view.timeToPixels(this._segment.startTime) : frameOffset),
-      Math.floor(this._segment ? this._view.timeToPixels(this._segment.endTime)   : frameOffset + width),
+      startPixels,
+      endPixels,
       width,
       height,
       segmentDetailsHeight
@@ -153,13 +175,19 @@ define(['./utils', 'konva', './store'], function(Utils, Konva, store) {
     }
 
     var limit = frameOffset + width;
-
     if (endPixels > limit) {
       endPixels = limit;
     }
 
-    if (endPixels > waveformData.length) {
-      endPixels = waveformData.length;
+    if (!this._segment) {
+      if (endPixels > waveformData.length) {
+        endPixels = waveformData.length;
+      }
+    } else if (this._segment.type !== 'SELECTION_REGION') {
+      const segmentStartPixel = this._view.timeToPixels(this._segment.startTime);
+      if (endPixels > segmentStartPixel + waveformData.length) {
+        endPixels = segmentStartPixel + waveformData.length;
+      }
     }
 
     var channels = waveformData.channels;
@@ -202,53 +230,19 @@ define(['./utils', 'konva', './store'], function(Utils, Konva, store) {
    * @param {Number} height The height of the waveform channel area, in pixels.
    */
 
-  WaveformShape.prototype._drawChannel = function(context, channel,
-      frameOffset, startPixels, endPixels, top, height, segmentDetailsHeight) {
-    var x, amplitude;
-
-    var amplitudeScale = this._view.getAmplitudeScale();
-
-    var lineX, lineY;
-
-    if (this._type === 'recording') {
-      context.beginPath();
-      context.strokeStyle = '#bbbbbb';
-
-      for (x = startPixels; x < endPixels + startPixels - 10; x += 60) {
-        lineX = x - startPixels - frameOffset;
-        context.moveTo(lineX, 0);
-        context.lineTo(lineX, 265);
-      }
-      context.stroke();
-      context.closePath();
-    }
-
-    context.beginPath();
-
-    if (this._pattern) {
-      this.fillPatternOffsetX(frameOffset)
-    }
-    for (x = startPixels; x < endPixels; x++) {
-      amplitude = channel.min_sample(x);
-
-      lineX = x - frameOffset + 0.5;
-      lineY = top + WaveformShape.scaleY(amplitude, height, amplitudeScale) + 0.5 + segmentDetailsHeight;
-
-      context.lineTo(lineX, lineY);
-    }
-
-    for (x = endPixels - 1; x >= startPixels; x--) {
-      amplitude = channel.max_sample(x);
-
-      lineX = x - frameOffset + 0.5;
-      lineY = top + WaveformShape.scaleY(amplitude, height, amplitudeScale) + 0.5 + segmentDetailsHeight;
-
-      context.lineTo(lineX, lineY);
-    }
-
-    context.closePath();
-
-    context.fillShape(this);
+  WaveformShape.prototype._drawChannel = function(context, channel, frameOffset, startPixels, endPixels, top, height, segmentDetailsHeight) {
+    store.getStore().getState().drawChannelFunc.call(
+      this,
+      context,
+      channel,
+      frameOffset,
+      startPixels,
+      endPixels,
+      top,
+      height,
+      segmentDetailsHeight,
+      WaveformShape.scaleY
+    )
   };
 
   WaveformShape.prototype._waveformShapeHitFunc = function(context) {

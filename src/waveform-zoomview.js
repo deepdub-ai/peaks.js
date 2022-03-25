@@ -53,6 +53,8 @@ define([
     self._container = container;
     self._peaks = peaks;
 
+    self._resampleDataCallId = 0;
+
     // Bind event handlers
     // self._onTimeUpdate = self._onTimeUpdate.bind(self);
     self._onPlay = self._onPlay.bind(self);
@@ -63,6 +65,7 @@ define([
     self._onKeyboardShiftLeft = self._onKeyboardShiftLeft.bind(self);
     self._onKeyboardShiftRight = self._onKeyboardShiftRight.bind(self);
     self._updateTime = self._updateTime.bind(self);
+    self.getWaveformData = self.getWaveformData.bind(self);
 
     self.render = self.render.bind(self);
 
@@ -107,6 +110,13 @@ define([
       height: self._height,
     });
 
+    // Konva's _wheel handler is called on wheel events,
+    // and its execution time is 4-6ms.
+    // We don't see any value in what it's doing, so
+    // we'll just disable it.
+    //
+    Konva.Stage.prototype._wheel = function () {}
+
     self._waveformLayer = new Konva.FastLayer();
 
     self._createWaveform();
@@ -140,6 +150,8 @@ define([
 
     self._syncPlayhead(time);
 
+    self.isChromeCanary = localStorage.getItem('isChromeCanary') === 'true';
+
     self._mouseDragHandler = new MouseDragHandler(self._stage, {
       totalMovementX: 0,
       initPixelIndex: 0,
@@ -147,10 +159,12 @@ define([
       isAltKeyDownWhenMouseDown: false,
       mouseDownZoom: 0,
       initMousePosX: 0,
+      preventContextMenu: true,
+      padding: 0,
+      containerBounds: null,
 
-      onMouseDown: function (mousePosX, event) {
+      onMouseDown: function (mousePosX, mousePosY, event) {
         store.getStore().setState({ isDragging: true });
-
         this.isAltKeyDownWhenMouseDown = event.evt.altKey;
         this.initialFrameOffset = self._frameOffset;
         this._isShiftKeyDownOnMouseDown = event.evt.shiftKey;
@@ -163,10 +177,30 @@ define([
         this.initPixelIndex = pixelIndex;
         this.initMousePosX = mousePosX;
         var time = self.pixelsToTime(pixelIndex);
+
+        if (event.evt.button === 2) {
+          event.evt.preventDefault()
+          self._peaks.emit("zoomview.context_menu", time, {x: mousePosX, y: mousePosY});
+          return false
+        }
+
+        self._peaks.options.store.setState({ isDragging: true });
+
         self._peaks.emit("zoomview.mousedown", time, event);
 
-        this.pointerLockTarget = event.evt.target;
-        event.evt.target.setPointerCapture(1);
+        this.pointerLockTarget = event.evt.currentTarget;
+        this.containerBounds = event.evt.currentTarget.getBoundingClientRect();
+        this.padding = 100;
+        if (mousePosX < 100) {
+          this.padding = mousePosX - 10;
+        } else if (this.containerBounds.width - mousePosX < 100) {
+          this.padding = this.containerBounds.width - mousePosX - 10;
+        }
+        // TODO[epic="generation"] do we really need setPointerCapture?
+        //
+        // this.pointerLockTarget = event.evt.target.closest('[data-main-track]');
+        // this.pointerLockTarget.setPointerCapture(1);
+
 
         // TODO use these "hooks" when making further fixes to human interaction
         // with the zoomview
@@ -174,7 +208,11 @@ define([
         // window.onPeaksMouseDown.bind(this)(mousePosX, event);
       },
 
-      onMouseMove: function (eventType, mousePosX, event) {
+      onMouseMove: function (eventType, mousePosX, _, event) {
+        if (event.button === 2) {
+          return
+        }
+
         // FIXME this might cause an issue?
         // These lines were in the base, while the uncommented lines appear in the
         // fork branch.
@@ -207,23 +245,23 @@ define([
           return self.pixelsToTime(pixelIndex);
         };
 
-        const layerX = event.layerX
-        const movementX = event.movementX
-        const rightDistance = this.pointerLockTarget.getBoundingClientRect().width - layerX
+        const mouseX = event.clientX - this.containerBounds.left;
+        const movementX = event.movementX / window.devicePixelRatio
+        const rightDistance = this.pointerLockTarget.getBoundingClientRect().width - mouseX
         if (this.isLocked && ((!this.isPanningLeft && movementX < 0) || (this.isPanningLeft && movementX > 0))) {
           document.exitPointerLock()
-          this.pointerLockTarget.setPointerCapture(1);
+          // this.pointerLockTarget.setPointerCapture(1);
           this.isLocked = false;
-        } else if (!this.isLocked && ((movementX < 0 && layerX <= 100) || (movementX > 0 && rightDistance <= 100))) {
-          this.pointerLockTarget.requestPointerLock().catch(() => { });
+        } else if (!this.isLocked && ((movementX < 0 && mouseX <= this.padding) || (movementX > 0 && rightDistance <= this.padding))) {
+          this.pointerLockTarget.requestPointerLock().catch(() => {});
           this.isLocked = true;
-          this.isPanningLeft = layerX <= 100;
+          this.isPanningLeft = mouseX <= this.padding;
         }
 
         const calculateOffset = () => {
           const mousePos = this.totalMovementX + this.initMousePosX;
           const width = self._width;
-          const padding = 100;
+          const padding = this.padding;
           const absMousePos = mousePos + this.initialFrameOffset;
           let offset = 0;
           if (absMousePos < self._frameOffset + padding) {
@@ -247,8 +285,16 @@ define([
         };
 
         if (eventType !== "touchmove") {
-          this.totalMovementX += event.movementX;
+          this.totalMovementX += event.movementX / window.devicePixelRatio;
           const time = calculateTime();
+
+          // This is a temporary fix for the issue where if the user scrolls
+          // too much to the left, they have to scroll the same length to the
+          // right to start dragging the segment.
+          //
+          if (time < 0) {
+            this.totalMovementX -= event.movementX / window.devicePixelRatio;
+          }
 
           self._peaks.emit("zoomview.drag", time, event);
 
@@ -267,13 +313,18 @@ define([
         this.newFrameOffset = newFrameOffset;
 
         if (newFrameOffset !== this.initialFrameOffset) {
-          self._updateWaveform(newFrameOffset);
+          self._updateWaveform(newFrameOffset, this.isLocked ? 'drag-scroll' : undefined);
+          // self._updateWaveform(newFrameOffset)
         }
       },
 
-      onMouseUp: function (mousePosX, mousePosY, e) {
+      onMouseUp: function (_, __, event) {
+        if (event.button === 2) {
+          return
+        }
+
         if (this.isLocked) {
-        document.exitPointerLock();
+          document.exitPointerLock();
           this.isLocked = false;
         } else {
           this.pointerLockTarget.releasePointerCapture(1);
@@ -287,11 +338,6 @@ define([
         var pixelIndex = self._frameOffset + mouseDownX;
 
         var time = self.pixelsToTime(pixelIndex);
-
-        if (e.button === 2) {
-          self._peaks.emit("zoomview.context_menu", time, {x: mousePosX, y: mousePosY});
-          return
-        }
 
         var duration = self._getDuration();
 
@@ -352,9 +398,14 @@ define([
             ? Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY
             : event.deltaX;
 
-          var newFrameOffset = Utils.clamp(self._frameOffset + delta, 0, self._pixelLength - self._width);
+            // This handles a weird behavior in Chrome Canary where deltaX/Y values are twice as big
+            // than in plain Chrome.
+            //
+            const MOUSE_DELTA_MULTIPLIER = self.isChromeCanary ? 0.5 : 1
+            var newFrameOffset = Utils.clamp(self._frameOffset + delta * MOUSE_DELTA_MULTIPLIER, 0, self._pixelLength - self._width);
 
           self._updateWaveform(newFrameOffset, 'wheel');
+          self._peaks.emit("zoomview.scroll", newFrameOffset);
         }
       },
     });
@@ -383,13 +434,9 @@ define([
   // };
 
   WaveformZoomView.prototype._updateTime = function () {
-    const now = performance.now();
-
-    const isPlaying = this._peaks.player.isPlaying();
-    const overview = this._peaks.views.getView('overview');
-    const isSeeking = overview && overview._isSeeking;
-
-    const state = store.getStore().getState();
+    if (this._isDestroyed) {
+      return;
+    }
 
     const currentTime = this._peaks.player.getCurrentTime();
     if (currentTime === this._prevCurrentTime) {
@@ -399,6 +446,30 @@ define([
 
     this._prevCurrentTime = currentTime;
 
+    const now = performance.now();
+
+    const isPlaying = this._peaks.player.isPlaying();
+    const overview = this._peaks.views.getView('overview');
+    const isSeeking = overview && overview._isSeeking;
+
+    const state = store.getStore().getState();
+
+    // Stop this loop if track isn't visible, restart it when it
+    // becomes visible again.
+    //
+    if (!state.tracksVisibility[this._peaks.options.trackId]) {
+      const unsubscribe = this._peaks.options.store.subscribe(
+        (isVisible) => {
+          if (isVisible) {
+            window.requestAnimationFrame(this._updateTime);
+            unsubscribe()
+          }
+        },
+        (state) => state.tracksVisibility[this._peaks.options.trackId]
+      );
+      return;
+    }
+
     if (
       isSeeking ||
       (!isPlaying && !isSeeking) ||
@@ -407,16 +478,12 @@ define([
     ) {
       this._playheadLayer.updatePlayheadTime(currentTime);
 
-      if (!this._cancelRequestAnimationFrame) {
-        window.requestAnimationFrame(this._updateTime);
-      }
+      window.requestAnimationFrame(this._updateTime);
       return;
     }
 
     this._syncPlayhead(currentTime);
-    if (!this._cancelRequestAnimationFrame) {
-      window.requestAnimationFrame(this._updateTime);
-    }
+    window.requestAnimationFrame(this._updateTime);
   };
 
   WaveformZoomView.prototype._onPlay = function (time) {
@@ -449,6 +516,10 @@ define([
         self._stage.width(width);
 
         self._resizeTimeoutId = setTimeout(function () {
+          if (self._originalWaveformData.duration === 0) {
+            return
+          }
+
           self._width = width;
           self._data = self._originalWaveformData.resample({ width: self._width, scale: 1 });
           self._stage.width(width);
@@ -525,9 +596,13 @@ define([
         this._frameOffset = 0;
       }
 
-      this._updateWaveform(this._frameOffset, 'auto-scroll');
+      this._updateWaveform(this._frameOffset, options.cause || 'auto-scroll');
     }
   };
+
+  WaveformZoomView.prototype.syncPlayhead = function (time) {
+    this._syncPlayhead(time)
+  },
 
   /**
    * Changes the zoom level.
@@ -547,7 +622,7 @@ define([
     );
   }
 
-  WaveformZoomView.prototype.setZoom = function (options) {
+  WaveformZoomView.prototype.setZoom = function (options, cause) {
     var scale;
 
     if (isAutoScale(options)) {
@@ -604,11 +679,15 @@ define([
 
     this._resampleData({ scale: scale });
 
+    if (cause === 'enter-view') {
+      return
+    }
+
     var apexPixel = this.timeToPixels(apexTime);
 
     this._frameOffset = apexPixel - playheadOffsetPixels;
 
-    this._updateWaveform(this._frameOffset, 'zoom');
+    this._updateWaveform(this._frameOffset, cause || 'zoom');
 
     this._playheadLayer.zoomLevelChanged();
 
@@ -619,7 +698,7 @@ define([
 
     // adapter.start(relativePosition);
 
-    this._peaks.emit("zoom.update", scale, prevScale);
+    this._peaks.emit("zoom.update", scale, prevScale, cause);
 
     return true;
   };
@@ -631,7 +710,17 @@ define([
   WaveformZoomView.prototype._resampleData = function (options) {
     this._data = this._originalWaveformData.resample(options);
     this._scale = this._data.scale;
-    this._pixelLength = this._data.length;
+    if (this._peaks.options.silence) {
+      this._pixelLength = this._data.pixels_per_second * this._peaks.options.silence.duration;
+    } else {
+      this._pixelLength = this._data.length;
+    }
+
+    // This is where the _real_ resampling happens. Due to its async nature, once resolved
+    // we call the callback function.
+    // Note that we only call it if this is last invocation of `_resampleData`.
+    //
+    this._peaks.options.store.getState().setResampleOptions('zoomview', options);
   };
 
   WaveformZoomView.prototype.getStartTime = function () {
@@ -642,7 +731,7 @@ define([
     return this.pixelsToTime(this._frameOffset + this._width);
   };
 
-  WaveformZoomView.prototype.setStartTime = function (time) {
+  WaveformZoomView.prototype.setStartTime = function (time, cuase) {
     if (time < 0) {
       time = 0;
     }
@@ -651,7 +740,19 @@ define([
       time = 0;
     }
 
-    this._updateWaveform(this.timeToPixels(time));
+    this._updateWaveform(this.timeToPixels(time), cuase || 'set-start-time');
+  };
+
+  WaveformZoomView.prototype.repaint = function () {
+    this._updateWaveform(this._frameOffset, 'repaint');
+  };
+
+  WaveformZoomView.prototype.show = function () {
+    this._stage.show();
+  };
+
+  WaveformZoomView.prototype.hide = function () {
+    this._stage.hide();
   };
 
   /**
@@ -698,6 +799,10 @@ define([
 
   WaveformZoomView.prototype.getFrameOffset = function () {
     return this._frameOffset;
+  };
+
+  WaveformZoomView.prototype.setFrameOffset = function (frameOffset) {
+    this._updateWaveform(frameOffset, 'explicit-set-frame-offset');
   };
 
   /**
@@ -759,7 +864,8 @@ define([
       color: this._options.zoomWaveformColor,
       view: this,
       pattern: this._peaks.options.zoomviewPattern,
-      type: this._options.type
+      type: this._options.type,
+      peaks: this._peaks,
     });
 
     this._waveformLayer.add(this._waveformShape);
@@ -790,7 +896,6 @@ define([
    *
    * @param {Number} frameOffset The new frame offset, in pixels.
    */
-
   WaveformZoomView.prototype._updateWaveform = function (frameOffset, cause) {
     var upperLimit;
 
@@ -823,7 +928,7 @@ define([
     this._pointsLayer.updatePoints(frameStartTime, frameEndTime);
     this._segmentsLayer.updateSegments(frameStartTime, frameEndTime);
 
-    this._peaks.emit("zoomview.displaying", frameStartTime, frameEndTime, cause);
+    this._peaks.emit("zoomview.displaying", frameStartTime, frameEndTime, this._frameOffset, cause);
   };
 
   WaveformZoomView.prototype.setWaveformColor = function (color) {
@@ -897,7 +1002,7 @@ define([
     this._pointsLayer.fitToView();
 
     if (updateWaveform) {
-      this._updateWaveform(this._frameOffset);
+      this._updateWaveform(this._frameOffset, 'fit-to-container');
     }
 
     this._stage.draw();
@@ -921,6 +1026,10 @@ define([
 
   WaveformZoomView.prototype.setAxisHideBottom = function (value) {
     this._axis.setAxisHideBottom(value);
+  };
+
+  WaveformZoomView.prototype.getContainer = function () {
+    return this._container;
   };
 
   WaveformZoomView.prototype.render = function () {
@@ -970,7 +1079,7 @@ define([
     this._peaks.off("keyboard.shift_left", this._onKeyboardShiftLeft);
     this._peaks.off("keyboard.shift_right", this._onKeyboardShiftRight);
 
-    this._cancelRequestAnimationFrame = true;
+    this._isDestroyed = true;
 
     this._playheadLayer.destroy();
     this._segmentsLayer.destroy();

@@ -172,6 +172,8 @@ define([
     self._mouseDragHandler = new MouseDragHandler(self._stage, {
       onMouseDown: function(mousePosX, mousePosY, event) {
         self._isSeeking = true;
+        self._peaks.views.getView('zoomview')._isDragginOverview = true;
+
         self._isCtrlSeeking = event.evt.ctrlKey;
         var highlightBounds = self._highlightLayer.getBounds()
         var yOffset = mousePosY - highlightBounds.y
@@ -191,6 +193,7 @@ define([
 
       onMouseUp: function() {
         self._isSeeking = false
+        self._peaks.views.getView('zoomview')._isDragginOverview = true;
         self._isCtrlSeeking = false
       }
     }, {

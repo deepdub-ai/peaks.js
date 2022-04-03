@@ -570,7 +570,7 @@ define([
 
     const padding = this._options.centerPlayhead ? this._width / 2 : 100;
 
-    if (this._enableAutoScroll) {
+    if (this._enableAutoScroll || this._isDragginOverview) {
       // Check for the playhead reaching the right-hand side of the window.
 
       var pixelIndex = this.timeToPixels(time);

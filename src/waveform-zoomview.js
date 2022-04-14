@@ -360,6 +360,10 @@ define([
       },
 
       onMouseWheel: function (event) {
+        if (event.defaultPrevented) {
+          return;
+        }
+
         if (!self._options.gestures) {
           return;
         }

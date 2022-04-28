@@ -252,7 +252,7 @@ define([
           document.exitPointerLock()
           // this.pointerLockTarget.setPointerCapture(1);
           this.isLocked = false;
-        } else if (!this.isLocked && ((movementX < 0 && mouseX <= this.padding) || (movementX > 0 && rightDistance <= this.padding))) {
+        } else if (self._options.hidePointerWhenCloseToEdge && !this.isLocked && ((movementX < 0 && mouseX <= this.padding) || (movementX > 0 && rightDistance <= this.padding))) {
           this.pointerLockTarget.requestPointerLock().catch(() => {});
           this.isLocked = true;
           this.isPanningLeft = mouseX <= this.padding;

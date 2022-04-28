@@ -440,10 +440,6 @@ define([
         return new Error('Peaks.init(): Missing mediaElement option');
       }
 
-      if (!(opts.mediaElement instanceof HTMLMediaElement)) {
-        // eslint-disable-next-line max-len
-        return new TypeError('Peaks.init(): The mediaElement option should be an HTMLMediaElement');
-      }
     }
 
     if (!opts.container && !opts.containers) {

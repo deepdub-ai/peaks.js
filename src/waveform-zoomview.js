@@ -66,6 +66,7 @@ define([
     self._onKeyboardShiftRight = self._onKeyboardShiftRight.bind(self);
     self._updateTime = self._updateTime.bind(self);
     self.getWaveformData = self.getWaveformData.bind(self);
+    self.resampleData = self.resampleData.bind(self);
 
     self.render = self.render.bind(self);
 
@@ -618,6 +619,10 @@ define([
     return (duration * this._data.sample_rate) / this._width;
   };
 
+  WaveformZoomView.prototype.getZoomScale = function () {
+    return this._scale;
+  };
+
   function isAutoScale(options) {
     return (
       (Utils.objectHasProperty(options, "scale") && options.scale === "auto") ||
@@ -725,6 +730,10 @@ define([
     // Note that we only call it if this is last invocation of `_resampleData`.
     //
     this._peaks.options.store.getState().setResampleOptions('zoomview', options);
+  };
+
+  WaveformZoomView.prototype.resampleData = function (options) {
+    this._resampleData(options)
   };
 
   WaveformZoomView.prototype.getStartTime = function () {

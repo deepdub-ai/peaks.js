@@ -248,6 +248,10 @@ define([
     this._highlightLayer.setHighlightBounds(y, height)
   };
 
+  WaveformOverview.prototype.getSegmentsLayerCanvas = function() {
+    return this._segmentsLayer._layer.canvas._canvas;
+  };
+
   WaveformOverview.prototype._onWindowResize = function() {
     //
     // After merge changes from SEGMENTS PANELS, it seems like the following

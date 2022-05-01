@@ -114,7 +114,13 @@ define([
    */
 
   WaveformAxis.prototype.drawAxis = function(context, view) {
-    var currentFrameStartTime = view.pixelsToTime(view.getFrameOffset());
+    const frameOffset = view.getFrameOffset();
+
+    if (frameOffset === undefined) {
+      return;
+    }
+
+    var currentFrameStartTime = view.pixelsToTime(frameOffset);
 
     // Draw axis markers
     var markerHeight = 10;

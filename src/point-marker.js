@@ -52,17 +52,18 @@ define([
 
     this._dragBoundFunc = this._dragBoundFunc.bind(this);
 
+    const trackId = options.peaks.options.trackId;
     this._group = new Konva.Group({
       draggable:     this._draggable,
       dragBoundFunc: this._dragBoundFunc,
-      y:             this._viewName === 'zoomview' ? store.getStore().getState().getSegmentDetailsHeight(store.getTrackId()) : 0,
+      y:             this._viewName === 'zoomview' ? store.getState().getSegmentDetailsHeight(trackId) : 0,
       listening:     false,
     });
 
     if (this._viewName === 'zoomview') {
-      this._unsubscribeFromStore = store.getStore().subscribe((segmentDetailsHeight) => {
+      this._unsubscribeFromStore = store.subscribe((segmentDetailsHeight) => {
         this._group.y(segmentDetailsHeight)
-      }, state => state.getSegmentDetailsHeight(store.getTrackId()))
+      }, state => state.getSegmentDetailsHeight(trackId))
     }
 
     this._bindDefaultEventHandlers();

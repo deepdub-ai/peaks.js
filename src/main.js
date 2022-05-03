@@ -293,7 +293,6 @@ define([
     var instance = new Peaks();
 
     store.setStore(opts.store)
-    store.setTrackId(opts.trackId)
 
     opts = opts || {};
 

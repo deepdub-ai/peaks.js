@@ -93,8 +93,9 @@ define([
   }
 
   SegmentShape.prototype._getSegmentDetailsHeight = function() {
+    const trackId = this._peaks.options.trackId
     return this._view.getName() === 'zoomview'
-      ? store.getStore().getState().getSegmentDetailsHeight(store.getTrackId())
+      ? store.getState().getSegmentDetailsHeight(trackId)
       : 0;
   },
 

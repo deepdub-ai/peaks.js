@@ -36,6 +36,8 @@ define([
     self._axisHideTop       = options.axisHideTop;
     self._axisHideBottom    = options.axisHideBottom;
 
+    self._view = view;
+
     self._axisLabelFont = WaveformAxis._buildFontString(
       options.axisLabelFontFamily,
       options.axisLabelFontSize,
@@ -152,8 +154,10 @@ define([
     var width  = view.getWidth();
     var height = view.getHeight();
 
+    const trackId = view._peaks.options.trackId;
+
     const segmentDetailsHeight = view.getName() === 'zoomview'
-      ? store.getStore().getState().getSegmentDetailsHeight(store.getTrackId())
+      ? store.getState().getSegmentDetailsHeight(trackId)
       : 0;
 
     if (segmentDetailsHeight !== 0) {

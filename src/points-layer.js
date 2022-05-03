@@ -171,6 +171,7 @@ define([
       onMouseEnter: this._onPointHandleMouseEnter,
       onMouseLeave: this._onPointHandleMouseLeave,
       view:         this._view.getName(),
+      peaks:        this._peaks,
     });
   };
 

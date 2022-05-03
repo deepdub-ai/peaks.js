@@ -121,6 +121,8 @@ define([
    */
 
   PlayheadLayer.prototype._createPlayhead = function(color) {
+    const trackId = this._view._peaks.options.trackId
+
     // Create with default points, the real values are set in fitToView().
     this._playheadLine = new Konva.Line({
       stroke:      color,
@@ -130,15 +132,15 @@ define([
     this._playheadGroup = new Konva.Group({
       x: 0,
       y: this._view.getName() === 'zoomview'
-        ? store.getStore().getState().getSegmentDetailsHeight(store.getTrackId())
+        ? store.getState().getSegmentDetailsHeight(trackId)
         : 0,
       listening: false,
     });
 
     if (this._view.getName() === 'zoomview') {
-      this._unsubscribeFromStore = store.getStore().subscribe((segmentDetailsHeight) => {
+      this._unsubscribeFromStore = store.subscribe((segmentDetailsHeight) => {
         this._playheadGroup.y(segmentDetailsHeight)
-      }, state => state.getSegmentDetailsHeight(store.getTrackId()))
+      }, state => state.getSegmentDetailsHeight(trackId))
     }
 
     this._playheadGroup.add(this._playheadLine);

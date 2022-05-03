@@ -165,7 +165,7 @@ define([
       containerBounds: null,
 
       onMouseDown: function (mousePosX, mousePosY, event) {
-        store.getStore().setState({ isDragging: true });
+        store.setState({ isDragging: true });
         this.isAltKeyDownWhenMouseDown = event.evt.altKey;
         this.initialFrameOffset = self._frameOffset;
         this._isShiftKeyDownOnMouseDown = event.evt.shiftKey;
@@ -331,7 +331,7 @@ define([
           this.pointerLockTarget.releasePointerCapture(1);
         }
 
-        store.getStore().setState({ isDragging: false });
+        store.setState({ isDragging: false });
 
         // Set playhead position only on click release, when not dragging.
         var mouseDownX = Math.floor(this.mouseDownX);
@@ -377,7 +377,7 @@ define([
           return;
         }
 
-        store.getStore().setState({ timeAtLastWheelEvent: performance.now() });
+        store.setState({ timeAtLastWheelEvent: performance.now() });
 
         event.preventDefault();
 
@@ -457,7 +457,7 @@ define([
     const overview = this._peaks.views.getView('overview');
     const isSeeking = overview && overview._isSeeking;
 
-    const state = store.getStore().getState();
+    const state = store.getState();
 
     // Stop this loop if track isn't visible, restart it when it
     // becomes visible again.
@@ -492,7 +492,7 @@ define([
   };
 
   WaveformZoomView.prototype._onPlay = function (time) {
-    store.getStore().setState({ timeAtLastPlayEvent: performance.now() });
+    store.setState({ timeAtLastPlayEvent: performance.now() });
     this._playheadLayer.updatePlayheadTime(time);
   };
 

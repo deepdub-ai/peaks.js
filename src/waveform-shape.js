@@ -115,8 +115,9 @@ define(['./utils', 'konva', './store'], function(Utils, Konva, store) {
       return
     }
 
+    const trackId = this._peaks.options.trackId;
     const segmentDetailsHeight = this._view.getName() === 'zoomview'
-      ? store.getStore().getState().getSegmentDetailsHeight(store.getTrackId())
+      ? store.getState().getSegmentDetailsHeight(trackId)
       : 0;
 
     var frameOffset = this._view.getFrameOffset();
@@ -231,7 +232,7 @@ define(['./utils', 'konva', './store'], function(Utils, Konva, store) {
    */
 
   WaveformShape.prototype._drawChannel = function(context, channel, frameOffset, startPixels, endPixels, top, height, segmentDetailsHeight) {
-    store.getStore().getState().drawChannelFunc.call(
+    store.getState().drawChannelFunc.call(
       this,
       context,
       channel,

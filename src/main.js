@@ -289,124 +289,135 @@ define([
    * @return {Peaks}
    */
 
-  Peaks.init = function(opts, callback) {
-    var instance = new Peaks();
-
-    store.setStore(opts.store)
-
-    opts = opts || {};
-
-    var err = instance._setOptions(opts);
-
-    if (err) {
-      callback(err);
-      return;
-    }
-
-    /*
-     Setup the layout
-     */
-
-    var containers = null;
-
-    if (instance.options.template) {
-      instance.options.container.innerHTML = instance.options.template;
-
-      containers = buildUi(instance.options.container);
-    }
-    else if (instance.options.containers) {
-      containers = instance.options.containers;
-    }
-    else {
-      // eslint-disable-next-line max-len
-      callback(new TypeError('Peaks.init(): The template option must be a valid HTML string or a DOM object'));
-      return;
-    }
-
-    var zoomviewContainer = containers.zoomview || containers.zoom;
-
-    if (!Utils.isHTMLElement(zoomviewContainer) &&
-        !Utils.isHTMLElement(containers.overview)) {
-      // eslint-disable-next-line max-len
-      callback(new TypeError('Peaks.init(): The containers.zoomview and/or containers.overview options must be valid HTML elements'));
-      return;
-    }
-
-    if (zoomviewContainer && zoomviewContainer.clientWidth <= 0) {
-      // eslint-disable-next-line max-len
-      callback(new TypeError('Peaks.init(): Please ensure that the zoomview container is visible and has non-zero width'));
-      return;
-    }
-
-    if (containers.overview && containers.overview.clientWidth <= 0) {
-      // eslint-disable-next-line max-len
-      callback(new TypeError('Peaks.init(): Please ensure that the overview container is visible and has non-zero width'));
-      return;
-    }
-
-    if (instance.options.keyboard) {
-      instance._keyboardHandler = new KeyboardHandler(instance);
-    }
-
-    var player = instance.options.player ?
-      instance.options.player :
-      new MediaElementPlayer(instance, instance.options.mediaElement);
-
-    instance.player = new Player(instance, player);
-    instance.segments = new WaveformSegments(instance);
-    instance.points = new WaveformPoints(instance);
-    instance.zoom = new ZoomController(instance, instance.options.zoomLevels);
-    instance.views = new ViewController(instance);
-
-    // Setup the UI components
-    var waveformBuilder = new WaveformBuilder(instance);
-
-    waveformBuilder.init(instance.options, function(err, waveformData) {
-      if (err) {
-        if (callback) {
-          callback(err);
+  Peaks.init = function(opts, _callback) {
+    return new Promise((resolve, reject) => {
+      function callback(err, instance) {
+        if (err) {
+          reject(err)
+          return
         }
 
+        if (_callback) {
+          _callback(err, instance);
+        }
+
+        resolve(instance)
+      }
+      var instance = new Peaks();
+
+      store.setStore(opts.store)
+
+      opts = opts || {};
+
+      var err = instance._setOptions(opts);
+
+      if (err) {
+        callback(err);
         return;
       }
 
-      instance._waveformData = waveformData;
+      /*
+       Setup the layout
+       */
 
-      if (containers.overview) {
-        instance.views.createOverview(containers.overview);
+      var containers = null;
+
+      if (instance.options.template) {
+        instance.options.container.innerHTML = instance.options.template;
+
+        containers = buildUi(instance.options.container);
+      }
+      else if (instance.options.containers) {
+        containers = instance.options.containers;
+      }
+      else {
+        // eslint-disable-next-line max-len
+        callback(new TypeError('Peaks.init(): The template option must be a valid HTML string or a DOM object'));
+        return;
       }
 
-      if (zoomviewContainer) {
-        instance.views.createZoomview(zoomviewContainer);
+      var zoomviewContainer = containers.zoomview || containers.zoom;
+
+      if (!Utils.isHTMLElement(zoomviewContainer) &&
+          !Utils.isHTMLElement(containers.overview)) {
+        // eslint-disable-next-line max-len
+        callback(new TypeError('Peaks.init(): The containers.zoomview and/or containers.overview options must be valid HTML elements'));
+        return;
       }
 
-      instance._addWindowResizeHandler();
-
-      if (instance.options.segments) {
-        instance.segments.add(instance.options.segments);
+      if (zoomviewContainer && zoomviewContainer.clientWidth <= 0) {
+        // eslint-disable-next-line max-len
+        callback(new TypeError('Peaks.init(): Please ensure that the zoomview container is visible and has non-zero width'));
+        return;
       }
 
-      if (instance.options.points) {
-        instance.points.add(instance.options.points);
+      if (containers.overview && containers.overview.clientWidth <= 0) {
+        // eslint-disable-next-line max-len
+        callback(new TypeError('Peaks.init(): Please ensure that the overview container is visible and has non-zero width'));
+        return;
       }
 
-      if (instance.options.emitCueEvents) {
-        instance._cueEmitter = new CueEmitter(instance);
+      if (instance.options.keyboard) {
+        instance._keyboardHandler = new KeyboardHandler(instance);
       }
 
-      // Allow applications to attach event handlers before emitting events,
-      // when initialising with local waveform data.
+      var player = instance.options.player ?
+        instance.options.player :
+        new MediaElementPlayer(instance, instance.options.mediaElement);
 
-      setTimeout(function() {
-        instance.emit('peaks.ready');
-      }, 0);
+      instance.player = new Player(instance, player);
+      instance.segments = new WaveformSegments(instance);
+      instance.points = new WaveformPoints(instance);
+      instance.zoom = new ZoomController(instance, instance.options.zoomLevels);
+      instance.views = new ViewController(instance);
 
-      if (callback) {
-        callback(null, instance);
-      }
-    });
+      // Setup the UI components
+      var waveformBuilder = new WaveformBuilder(instance);
+      waveformBuilder.init(instance.options, function(err, waveformData) {
+        if (err) {
+          if (callback) {
+            callback(err);
+          }
 
-    return instance;
+          return;
+        }
+
+        instance._waveformData = waveformData;
+
+        if (containers.overview) {
+          instance.views.createOverview(containers.overview);
+        }
+
+        if (zoomviewContainer) {
+          instance.views.createZoomview(zoomviewContainer);
+        }
+
+        instance._addWindowResizeHandler();
+
+        if (instance.options.segments) {
+          instance.segments.add(instance.options.segments);
+        }
+
+        if (instance.options.points) {
+          instance.points.add(instance.options.points);
+        }
+
+        if (instance.options.emitCueEvents) {
+          instance._cueEmitter = new CueEmitter(instance);
+        }
+
+        // Allow applications to attach event handlers before emitting events,
+        // when initialising with local waveform data.
+
+        setTimeout(function() {
+          instance.emit('peaks.ready');
+        }, 0);
+
+        if (callback) {
+          callback(null, instance);
+        }
+      });
+    })
   };
 
   Peaks.prototype._setOptions = function(opts) {

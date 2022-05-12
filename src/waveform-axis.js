@@ -157,7 +157,7 @@ define([
     const trackId = view._peaks.options.trackId;
 
     const segmentDetailsHeight = view.getName() === 'zoomview'
-      ? store.getState().getSegmentDetailsHeight(trackId)
+      ? store.getState(view._peaks.context).getSegmentDetailsHeight(trackId)
       : 0;
 
     if (segmentDetailsHeight !== 0) {

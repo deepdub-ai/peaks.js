@@ -56,12 +56,12 @@ define([
     this._group = new Konva.Group({
       draggable:     this._draggable,
       dragBoundFunc: this._dragBoundFunc,
-      y:             this._viewName === 'zoomview' ? store.getState().getSegmentDetailsHeight(trackId) : 0,
+      y:             this._viewName === 'zoomview' ? store.getState(options.peaks.context).getSegmentDetailsHeight(trackId) : 0,
       listening:     false,
     });
 
     if (this._viewName === 'zoomview') {
-      this._unsubscribeFromStore = store.subscribe((segmentDetailsHeight) => {
+      this._unsubscribeFromStore = store.subscribe(options.peaks.context, (segmentDetailsHeight) => {
         this._group.y(segmentDetailsHeight)
       }, state => state.getSegmentDetailsHeight(trackId))
     }

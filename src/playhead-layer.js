@@ -132,13 +132,13 @@ define([
     this._playheadGroup = new Konva.Group({
       x: 0,
       y: this._view.getName() === 'zoomview'
-        ? store.getState().getSegmentDetailsHeight(trackId)
+        ? store.getState(this._view._peaks.context).getSegmentDetailsHeight(trackId)
         : 0,
       listening: false,
     });
 
     if (this._view.getName() === 'zoomview') {
-      this._unsubscribeFromStore = store.subscribe((segmentDetailsHeight) => {
+      this._unsubscribeFromStore = store.subscribe(this._view._peaks.context, (segmentDetailsHeight) => {
         this._playheadGroup.y(segmentDetailsHeight)
       }, state => state.getSegmentDetailsHeight(trackId))
     }

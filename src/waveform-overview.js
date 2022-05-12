@@ -15,7 +15,8 @@ define([
   './waveform-axis',
   './waveform-shape',
   './utils',
-  'konva'
+  'konva',
+  './store'
 ], function(
     HighlightLayer,
     MouseDragHandler,
@@ -25,7 +26,8 @@ define([
     WaveformAxis,
     WaveformShape,
     Utils,
-    Konva) {
+    Konva,
+    store) {
   'use strict';
 
   /**
@@ -494,7 +496,7 @@ define([
 
       try {
         const options = { width: this._width }
-        this._peaks.options.store.getState().setResampleOptions('overview', options)
+        store.getState(this._peaks.context).setResampleOptions('overview', options)
         this._data = this._originalWaveformData.resample(options);
         // updateWaveform = true;
       }

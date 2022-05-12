@@ -31,8 +31,7 @@ define([
   Utils,
   Konva,
   _throttle,
-  store
-) {
+  store) {
   "use strict";
 
   /**
@@ -165,7 +164,6 @@ define([
       containerBounds: null,
 
       onMouseDown: function (mousePosX, mousePosY, event) {
-        store.setState({ isDragging: true });
         this.isAltKeyDownWhenMouseDown = event.evt.altKey;
         this.initialFrameOffset = self._frameOffset;
         this._isShiftKeyDownOnMouseDown = event.evt.shiftKey;
@@ -185,7 +183,7 @@ define([
           return false
         }
 
-        self._peaks.options.store.setState({ isDragging: true });
+        store.setState(self._peaks.context, { isDragging: true });
 
         self._peaks.emit("zoomview.mousedown", time, event);
 
@@ -331,7 +329,7 @@ define([
           this.pointerLockTarget.releasePointerCapture(1);
         }
 
-        store.setState({ isDragging: false });
+        store.setState(self._peaks.context, { isDragging: false });
 
         // Set playhead position only on click release, when not dragging.
         var mouseDownX = Math.floor(this.mouseDownX);
@@ -377,7 +375,7 @@ define([
           return;
         }
 
-        store.setState({ timeAtLastWheelEvent: performance.now() });
+        store.setState(self._peaks.context, { timeAtLastWheelEvent: performance.now() });
 
         event.preventDefault();
 
@@ -457,13 +455,14 @@ define([
     const overview = this._peaks.views.getView('overview');
     const isSeeking = overview && overview._isSeeking;
 
-    const state = store.getState();
+    const state = store.getState(this._peaks.context);
 
     // Stop this loop if track isn't visible, restart it when it
     // becomes visible again.
     //
     if (!state.tracksVisibility[this._peaks.options.trackId]) {
-      const unsubscribe = this._peaks.options.store.subscribe(
+      const unsubscribe = store.subscribe(
+        this._peaks.context,
         (isVisible) => {
           if (isVisible) {
             window.requestAnimationFrame(this._updateTime);
@@ -492,7 +491,7 @@ define([
   };
 
   WaveformZoomView.prototype._onPlay = function (time) {
-    store.setState({ timeAtLastPlayEvent: performance.now() });
+    store.setState(this._peaks.context, { timeAtLastPlayEvent: performance.now() });
     this._playheadLayer.updatePlayheadTime(time);
   };
 
@@ -729,7 +728,7 @@ define([
     // we call the callback function.
     // Note that we only call it if this is last invocation of `_resampleData`.
     //
-    this._peaks.options.store.getState().setResampleOptions('zoomview', options);
+    store.getState(this._peaks.context).setResampleOptions('zoomview', options);
   };
 
   WaveformZoomView.prototype.resampleData = function (options) {

@@ -95,7 +95,7 @@ define([
   SegmentShape.prototype._getSegmentDetailsHeight = function() {
     const trackId = this._peaks.options.trackId
     return this._view.getName() === 'zoomview'
-      ? store.getState().getSegmentDetailsHeight(trackId)
+      ? store.getState(this._peaks.context).getSegmentDetailsHeight(trackId)
       : 0;
   },
 
@@ -170,6 +170,7 @@ define([
       view:         this._view.getName(),
       getEndMarker: () => this._endMarker,
       segmentDetailsHeight: this._getSegmentDetailsHeight(),
+      context:      this._segment._peaks.options.context
     });
 
     if (startMarker) {
@@ -199,6 +200,7 @@ define([
       view:         this._view.getName(),
       getStartMarker: () => this._startMarker,
       segmentDetailsHeight: this._getSegmentDetailsHeight(),
+      context: this._segment._peaks.options.context
     });
 
     if (endMarker) {
@@ -296,7 +298,9 @@ define([
   SegmentShape.prototype.getWaveformData = function() {
     const view = this._view.getName()
 
-    const waveform = this._peaks.options.store.getState().getWaveformById(view, this._segment.waveformId, this._segment.id)
+    const state = store.getState(this._peaks.context);
+
+    const waveform = state.getWaveformById(view, this._segment.waveformId, this._segment.id)
 
     if (waveform && waveform.data) {
       return waveform.data;
@@ -306,13 +310,13 @@ define([
       return null;
     }
 
-    const originalWaveform = this._peaks.options.store.getState().getOriginalWaveformById('zoomview', this._segment.waveformId)
+    const originalWaveform = state.getOriginalWaveformById('zoomview', this._segment.waveformId)
 
     if (originalWaveform) {
       return originalWaveform;
     }
 
-    const silentWaveform = this._peaks.options.store.getState().getSilentWaveform();
+    const silentWaveform = state.getSilentWaveform();
 
     return silentWaveform;
   };

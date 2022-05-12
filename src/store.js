@@ -5,20 +5,20 @@
 define([], function () {
   "use strict";
 
-  let _store;
+  const stores = {};
 
   return {
-    setStore(store) {
-      _store = store;
+    setStore(store, context) {
+      stores[context] = store;
     },
-    getState() {
-      return _store.getState();
+    getState(context) {
+      return stores[context].getState();
     },
-    subscribe(...args) {
-      return _store.subscribe(...args);
+    setState(context, ...args) {
+      return stores[context].setState(...args);
     },
-    setState(...args) {
-      return _store.setState(...args);
+    subscribe(context, ...args) {
+      return stores[context].subscribe(...args);
     },
   };
 });

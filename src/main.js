@@ -53,7 +53,7 @@ define([
    * @param {Object} opts Configuration options
    */
 
-  function Peaks() {
+  function Peaks(context) {
     EventEmitter.call(this);
 
     this.options = {
@@ -276,6 +276,8 @@ define([
     // eslint-disable-next-line no-console
     this.logger = console.error.bind(console);
 
+    this.context = context;
+
     return this;
   }
 
@@ -303,9 +305,9 @@ define([
 
         resolve(instance)
       }
-      var instance = new Peaks();
+      var instance = new Peaks(opts.context);
 
-      store.setStore(opts.store)
+      store.setStore(opts.store, opts.context)
 
       opts = opts || {};
 

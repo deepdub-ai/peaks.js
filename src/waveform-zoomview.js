@@ -245,7 +245,7 @@ define([
         };
 
         const mouseX = event.clientX - this.containerBounds.left;
-        const movementX = event.movementX / window.devicePixelRatio
+        const movementX = event.movementX;
         const rightDistance = this.pointerLockTarget.getBoundingClientRect().width - mouseX
         if (this.isLocked && ((!this.isPanningLeft && movementX < 0) || (this.isPanningLeft && movementX > 0))) {
           document.exitPointerLock()
@@ -284,7 +284,7 @@ define([
         };
 
         if (eventType !== "touchmove") {
-          this.totalMovementX += event.movementX / window.devicePixelRatio;
+          this.totalMovementX += event.movementX;
           const time = calculateTime();
 
           // This is a temporary fix for the issue where if the user scrolls
@@ -292,7 +292,7 @@ define([
           // right to start dragging the segment.
           //
           if (time < 0) {
-            this.totalMovementX -= event.movementX / window.devicePixelRatio;
+            this.totalMovementX -= event.movementX;
           }
 
           self._peaks.emit("zoomview.drag", time, event);

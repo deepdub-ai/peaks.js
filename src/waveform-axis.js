@@ -170,7 +170,7 @@ define([
     for (;;) {
       // Position of axis marker (pixels)
       x = axisLabelOffsetPixels + view.timeToPixels(secs - firstAxisLabelSecs);
-      if (x >= width) {
+      if (x >= width || isNaN(x)) {
         break;
       }
 

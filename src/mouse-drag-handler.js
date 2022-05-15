@@ -64,6 +64,7 @@ define(["konva"], function (Konva) {
     this._stage.on("contextmenu", this._contextMenu);
 
     this._mouseDownClientX = null;
+    this._mouseDownClientY = null;
 
     stage.container().addEventListener("wheel", this._mouseWheel, false);
   }
@@ -93,8 +94,10 @@ define(["konva"], function (Konva) {
 
     if (event.type === "touchstart") {
       this._mouseDownClientX = Math.floor(event.evt.touches[0].clientX);
+      this._mouseDownClientY = Math.floor(event.evt.touches[0].clientY);
     } else {
       this._mouseDownClientX = event.evt.clientX;
+      this._mouseDownClientY = event.evt.clientY;
     }
 
     if (this._handlers.onMouseDown) {
@@ -148,7 +151,14 @@ define(["konva"], function (Konva) {
     //   return;
     // }
 
-    this._dragging = true;
+    const delta = Math.sqrt(Math.pow(clientX - this._mouseDownClientX, 2) + Math.pow(clientY - this._mouseDownClientY, 2));
+
+    // TODO This "3" is in accordance with START_DRAG_DELTA in deepdubapp,
+    // instead of hard-coding it, pass it through options.
+    //
+    if (delta > 3) {
+      this._dragging = true;
+    }
 
     if (this._handlers.onMouseMove) {
       var mousePosX = this._getMousePosX(clientX);

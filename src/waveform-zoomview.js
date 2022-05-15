@@ -6,7 +6,7 @@
  * @module waveform-zoomview
  */
 
-define([
+ define([
   "./mouse-drag-handler",
   "./playhead-layer",
   "./points-layer",
@@ -346,16 +346,17 @@ define([
           time = duration;
         }
 
+        self._peaks.emit("zoomview.mouseup", time, event);
+
         if (
           !self._mouseDragHandler.isDragging() &&
           !this._isShiftKeyDownOnMouseDown &&
-          !window.peaksIgnoreClick
+          !window.peaksIgnoreClick &&
+          !event.cancelBubble
         ) {
           self._playheadLayer.updatePlayheadTime(time);
           self._peaks.player.seek(time);
         }
-
-        self._peaks.emit("zoomview.mouseup", time);
       },
 
       onMouseWheel: function (event) {

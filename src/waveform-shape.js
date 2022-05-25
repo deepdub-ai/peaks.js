@@ -184,7 +184,7 @@ define(['./utils', 'konva', './store'], function(Utils, Konva, store) {
       if (endPixels > waveformData.length) {
         endPixels = waveformData.length;
       }
-    } else if (this._segment.type !== 'SELECTION_REGION') {
+    } else if (this._segment.type !== 'SELECTION_REGION' && this._segment.type !== 'CROSSFADE') {
       const segmentStartPixel = this._view.timeToPixels(this._segment.startTime);
       if (endPixels > segmentStartPixel + waveformData.length) {
         endPixels = segmentStartPixel + waveformData.length;

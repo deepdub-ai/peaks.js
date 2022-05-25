@@ -319,5 +319,17 @@ define([
     return this._layer.getHeight();
   };
 
+  SegmentsLayer.prototype.getView = function() {
+    return this._view;
+  };
+
+  SegmentsLayer.prototype.getStage = function() {
+    return this._layer.parent;
+  };
+
+  SegmentsLayer.prototype.getPeaks = function() {
+    return this._peaks;
+  };
+
   return SegmentsLayer;
 });

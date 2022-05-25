@@ -1,6 +1,6 @@
 {
   "name": "@deepdub/peaks.js",
-  "version": "1.2.15",
+  "version": "1.2.17",
   "description": "JavaScript UI component for displaying audio waveforms",
   "main": "./peaks.js",
   "files": [
@@ -35,10 +35,10 @@
   },
   "scripts": {
     "prebuild": "npm run lint",
-    "bump-prerelease": "npm version prerelease --preid=yalc --no-git-tag-version && cp ./package.json ../deepdubapp/node_modules/@deepdub/peaks.js/",
+    "bump-prerelease": "npm version prerelease --preid=yalc --no-git-tag-version && cp ./package.json ../deepdubapp-dev/node_modules/@deepdub/peaks.js/",
     "build": "browserify -d -e ./src/main.js -t deamdify -s peaks | exorcist peaks.js.map | derequire - > peaks.js",
     "build:watch": "watchify -d -e ./src/main.js -t deamdify -s peaks -o ./demo/peaks.js",
-    "build:watch-deepdub": "watchify -d -e ./src/main.js -t deamdify -s peaks -o ../deepdubapp/node_modules/@deepdub/peaks.js/peaks.js",
+    "build:watch-deepdub": "watchify -d -e ./src/main.js -t deamdify -s peaks -o ../deepdubapp-dev/node_modules/@deepdub/peaks.js/peaks.js",
     "postbuild": "copyfiles peaks.js peaks.js.map demo",
     "doc": "jsdoc --private --destination docs --recurse src",
     "lint": "eslint src/*.js test/**/*.js test/*.js karma.conf.js",

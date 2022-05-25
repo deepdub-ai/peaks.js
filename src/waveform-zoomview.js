@@ -754,6 +754,7 @@
     }
 
     this._updateWaveform(this.timeToPixels(time), cuase || 'set-start-time');
+    this._stage.draw();
   };
 
   WaveformZoomView.prototype.repaint = function () {
@@ -812,6 +813,14 @@
 
   WaveformZoomView.prototype.getFrameOffset = function () {
     return this._frameOffset;
+  };
+
+  WaveformZoomView.prototype.getVisibleStartTime = function () {
+    return this.pixelsToTime(this._frameOffset);
+  };
+
+  WaveformZoomView.prototype.getVisibleEndTime = function () {
+    return this.pixelsToTime(this._frameOffset + this._width);
   };
 
   WaveformZoomView.prototype.setFrameOffset = function (frameOffset) {
@@ -1047,6 +1056,10 @@
 
   WaveformZoomView.prototype.render = function () {
     this._updateWaveform(this._frameOffset, 'explicit-render');
+  },
+
+  WaveformZoomView.prototype.getStage = function () {
+    return this._stage;
   },
 
   /* WaveformZoomView.prototype.beginZoom = function() {

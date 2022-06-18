@@ -193,7 +193,7 @@ define([
    * @param {Boolean} loop If true, playback is looped.
    */
 
-  Player.prototype.playSegment = function(segment, { loop, fadeIn, fadeOut, startOffset = 0 } = { startOffset: 0 }) {
+  Player.prototype.playSegment = function(segment, { loop, fadeIn, fadeOut, startOffset = 0, volume = 1 } = { startOffset: 0, volume: 1 }) {
     var self = this;
 
     if (!segment ||
@@ -216,12 +216,12 @@ define([
       self._adapter._mediaElement.volume = 0;
     }
     else {
-      self._adapter._mediaElement.volume = 1;
+      self._adapter._mediaElement.volume = volume;
     }
 
     self._peaks.once('player.playing', function() {
       if (fadeIn) {
-        fadeAudio(self._adapter._mediaElement, 1, fadeIn * 1000);
+        fadeAudio(self._adapter._mediaElement, volume, fadeIn * 1000);
       }
 
       if (!self._playingSegment) {

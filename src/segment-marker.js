@@ -83,16 +83,6 @@ define([
         self._onDragEnd(self);
       });
     }
-
-    if (self._draggable) {
-      self._group.on('mouseenter', function() {
-        self._layer._layer.getStage().container().style.cursor = 'grab';
-      });
-
-      self._group.on('mouseleave', function() {
-        self._layer._layer.getStage().container().style.cursor = 'default';
-      });
-    }
   };
 
   SegmentMarker.prototype._dragBoundFunc = function(pos) {

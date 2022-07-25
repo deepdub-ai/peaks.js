@@ -48,6 +48,8 @@ define([
     this._peaks.on('segments.hide', this._onSegmentsHide);
     this._peaks.on('segments.remove_all', this._onSegmentsRemoveAll);
     this._peaks.on('segments.dragged', this._onSegmentsDragged);
+
+    this._isGenedit = true;
   }
 
   /**
@@ -90,7 +92,7 @@ define([
       redraw = true;
     }
 
-    if (redraw) {
+    if (redraw && !this._isGenedit) {
       this.updateSegments(frameStartTime, frameEndTime);
     }
   };

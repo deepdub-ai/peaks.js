@@ -1,6 +1,6 @@
 {
   "name": "@deepdub/peaks.js",
-  "version": "1.2.21",
+  "version": "1.2.23",
   "description": "JavaScript UI component for displaying audio waveforms",
   "main": "./peaks.js",
   "files": [

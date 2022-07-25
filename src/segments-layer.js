@@ -48,8 +48,6 @@ define([
     this._peaks.on('segments.hide', this._onSegmentsHide);
     this._peaks.on('segments.remove_all', this._onSegmentsRemoveAll);
     this._peaks.on('segments.dragged', this._onSegmentsDragged);
-
-    this._isGenedit = true;
   }
 
   /**
@@ -92,7 +90,7 @@ define([
       redraw = true;
     }
 
-    if (redraw && !this._isGenedit) {
+    if (redraw) {
       this.updateSegments(frameStartTime, frameEndTime);
     }
   };
@@ -122,7 +120,7 @@ define([
       self._hideSegment(segment);
     });
 
-    self._layer.draw();
+    self.draw();
   };
 
   SegmentsLayer.prototype._onSegmentsRemove = function(segments) {
@@ -132,19 +130,19 @@ define([
       self._removeSegment(segment);
     });
 
-    self._layer.draw();
+    self.draw();
   };
 
   SegmentsLayer.prototype._onSegmentsRemoveAll = function() {
     this._layer.removeChildren();
     this._segmentShapes = {};
 
-    this._layer.draw();
+    this.draw()
   };
 
   SegmentsLayer.prototype._onSegmentsDragged = function(segment) {
     this._updateSegment(segment);
-    this._layer.draw();
+    this.draw()
   };
 
   /**
@@ -200,7 +198,7 @@ define([
     count += this._removeInvisibleSegments(startTime, endTime);
 
     if (count > 0) {
-      this._layer.draw();
+      this.draw()
     }
   };
 
@@ -292,6 +290,10 @@ define([
   };
 
   SegmentsLayer.prototype.draw = function() {
+    if (this._view.getName() === 'overview') {
+      return
+    }
+
     this._layer.draw();
   };
 
@@ -311,10 +313,6 @@ define([
         segmentShape.fitToView();
       }
     }
-  };
-
-  SegmentsLayer.prototype.draw = function() {
-    this._layer.draw();
   };
 
   SegmentsLayer.prototype.getHeight = function() {

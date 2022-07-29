@@ -150,6 +150,10 @@ define([
     }
   };
 
+  SegmentMarker.prototype.render = function() {
+    this._marker.render();
+  };
+
   SegmentMarker.prototype.hide = function() {
     this._group.hide();
   };

@@ -335,6 +335,11 @@ define([
     }
   };
 
+  SegmentShape.prototype.render = function() {
+    this._startMarker.render();
+    this._endMarker.render();
+  };
+
   SegmentShape.prototype.hide = function() {
     if (this._startMarker) {
       this._startMarker.hide();

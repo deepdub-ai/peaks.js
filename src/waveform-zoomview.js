@@ -442,11 +442,12 @@
       return;
     }
 
-    const currentTime = this._peaks.player.getCurrentTime();
-    if (currentTime === this._prevCurrentTime) {
+    if (this._peaks.player.getCurrentTime() === this._prevCurrentTime) {
       window.requestAnimationFrame(this._updateTime);
       return;
     }
+
+    const currentTime = this._peaks.player.getCurrentTime();
 
     this._prevCurrentTime = currentTime;
 
@@ -1056,6 +1057,10 @@
 
   WaveformZoomView.prototype.render = function () {
     this._updateWaveform(this._frameOffset, 'explicit-render');
+  },
+
+  WaveformZoomView.prototype.renderSegments = function (segmentIds) {
+    this._segmentsLayer.renderSegments(segmentIds)
   },
 
   WaveformZoomView.prototype.getStage = function () {

@@ -289,6 +289,12 @@ define([
     this._layer.setVisible(visible);
   };
 
+  SegmentsLayer.prototype.renderSegments = function(segmentIds) {
+    const segmentShapes = segmentIds.map(id => this._segmentShapes[id]).filter(Boolean);
+
+    segmentShapes.forEach(segmentShape => segmentShape.render());
+  };
+
   SegmentsLayer.prototype.draw = function() {
     if (this._view.getName() === 'overview') {
       return
@@ -298,6 +304,8 @@ define([
   };
 
   SegmentsLayer.prototype.destroy = function() {
+    Object.values(this._segmentShapes).forEach(segmentShape => segmentShape.destroy())
+
     this._peaks.off('segments.update', this._onSegmentsUpdate);
     this._peaks.off('segments.add', this._onSegmentsAdd);
     this._peaks.off('segments.remove', this._onSegmentsRemove);
